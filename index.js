@@ -1,74 +1,40 @@
-const Config = require('./config');
+const ReperioServer = require('hapijs-starter').default;
+const API = require('./api');
+const UnitOfWork = require('./db');
 
-exports.register = function (server, options, next) {
-	server.route({
-        method: 'OPTIONS',
-        path: '/{p*}',
-        config: {
-            handler: function(request, reply) {
-                var response = reply();
-                response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization';
-				response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
-                return response;
-            },
-            cors: true
-        }
-	});
-	
-	server.route({
-        method: 'GET',
-        path: '/{param*}',
-        config: {
-        	auth: false,
-        	cors: true
-        },
-        handler: {
-            directory: {
-                path: Config.file_path,
-                redirectToSlash: true,
-                index: true,
+const start = async function () {
+    try {
+        const reperio_server = new ReperioServer();
+
+        const apiPluginPackage = {
+            plugin: API,
+            options: {},
+            routes: {
+                prefix: '/api'
             }
-        }
-    });
+        };
 
-    const onPreHandler = function(request, reply) {
-	    try {
+        await reperio_server.registerAdditionalPlugin(apiPluginPackage);
 
-	        // Ignore OPTIONS requests
-	        if(request.route.method === 'options') {
-	            return reply.continue();
-	        }
+        await reperio_server.registerExtension({
+            type: 'onRequest',
+            method: async (request, h) => {
+                request.app.uows = [];
+        
+                request.app.getNewUoW = async () => {
+                    const uow = new UnitOfWork(reperio_server.app.logger);
+                    request.app.uows.push(uow);
+                    return uow;
+                };
 
-	        const request_details = {
-	        	method: request.method,
-	        	query: request.query,
-	        	payload: request.payload,
-	        	params: request.params,
-	        	headers: request.headers,
-	        	info: request.info,
-	        	auth: request.auth
-	        }
+                return h.continue;
+            }
+        });
 
-	        request.server.app.logger.silly(request_details);
-	        
-	        reply.continue();
-	    }
-	    catch (err) {
-	        reply(Boom.badRequest(err.message));
-	    }
-	};
-
-	server.ext({
-        type: 'onPreHandler',
-        options: {
-            sandbox: 'plugin'
-        },
-        method: onPreHandler
-    });
-
-	next();
+        await reperio_server.startServer();
+    } catch (err) {
+        console.error(err);
+    }
 };
 
-exports.register.attributes = {
-    pkg: require('./package.json')
-};
+start();

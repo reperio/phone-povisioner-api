@@ -1,19 +1,39 @@
 {
-  "name": "phone_provisioner",
+  "name": "platform-api",
   "version": "1.0.0",
   "description": "",
+  "licsense": "MPL2",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --pretty",
+    "tsc-watch": "tsc --pretty -w",
+    "dev": "concurrently -k -r -s first \"npm run tsc-watch\" \"nodemon dist/index.js\""
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/reperio/phone_provisioner.git"
+    "url": "git+https://github.com/reperio/platform-api.git"
   },
   "author": "",
-  "license": "MPL2",
+  "license": "ISC",
   "bugs": {
-    "url": "https://github.com/reperio/phone_provisioner/issues"
+    "url": "https://github.com/reperio/platform-api/issues"
   },
-  "homepage": "https://github.com/reperio/phone_provisioner#readme"
+  "homepage": "https://github.com/reperio/platform-api#readme",
+  "dependencies": {
+    "hapijs-starter": "^2.0.0",
+    "knex": "^0.14.2",
+    "moment": "^2.20.1",
+    "moment-timezone": "^0.5.14",
+    "mysql": "^2.15.0",
+    "objection": "^0.9.4",
+    "uuid": "^3.2.1",
+    "winston": "^2.4.0",
+    "winston-daily-rotate-file": "^1.7.2"
+  },
+  "devDependencies": {
+    "concurrently": "^3.5.1",
+    "jest": "^22.1.4",
+    "nodemon": "^1.14.12"
+  }
 }
