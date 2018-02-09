@@ -47,7 +47,9 @@ class AccountsRepository {
     async createManufacturer(name, config) {
         try {
             await this.uow._models.Manufacturer
-                .insert({name: name, config: config});
+                .query(this.uow._transaction)
+                .insert({name: name, config: JSON.stringify(config)});
+            return true;
         } catch (err) {
             this.uow._logger.error('Failed to add a manufacturer to the database');
             this.uow._logger.error(err);
@@ -58,7 +60,9 @@ class AccountsRepository {
     async createFamily(name, manufacturer, config) {
         try {
             await this.uow._models.Family
-                .insert({name: name, config: config, manufacturer: manufacturer});
+                .query(this.uow._transaction)
+                .insert({name: name, config: JSON.stringify(config), manufacturer: manufacturer});
+            return true;
         } catch (err) {
             this.uow._logger.error('Failed to add a family to the database');
             this.uow._logger.error(err);
@@ -69,9 +73,36 @@ class AccountsRepository {
     async createModel(name, family, config) {
         try {
             await this.uow._models.PhoneModel
-                .insert({name: name, config: config, family: family});
+                .query(this.uow._transaction)
+                .insert({name: name, config: JSON.stringify(config), family: family});
+            return true;
         } catch (err) {
             this.uow._logger.error('Failed to add a phone model to the database');
+            this.uow._logger.error(err);
+            throw err;
+        }
+    }
+
+    async composeConfig(modelId) {
+        try {
+            const model = await this.uow._models.PhoneModel
+                .query(this.uow._transaction)
+                .where('id', modelId);
+            const family = await this.uow._models.Family
+                .query(this.uow._transaction)
+                .where('id', model[0].family);
+            const manufacturer = await this.uow._models.Manufacturer
+                .query(this.uow._transaction)
+                .where('id', family[0].manufacturer);
+
+            return Object.assign(
+                {},
+                JSON.parse(manufacturer[0].config),
+                JSON.parse(family[0].config),
+                JSON.parse(model[0].config)
+            );
+        } catch (err) {
+            this.uow._logger.error('Failed to fetch config from database');
             this.uow._logger.error(err);
             throw err;
         }
