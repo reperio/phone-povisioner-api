@@ -1,4 +1,4 @@
-class AccountsRepository {
+class ConfigurationRepository {
     constructor(uow) {
         this.uow = uow;
     }
@@ -109,4 +109,4 @@ class AccountsRepository {
     }
 }
 
-module.exports = AccountsRepository;
+module.exports = ConfigurationRepository;
