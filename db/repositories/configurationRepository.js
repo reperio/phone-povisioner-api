@@ -46,10 +46,10 @@ class ConfigurationRepository {
 
     async createManufacturer(name, config) {
         try {
-            await this.uow._models.Manufacturer
+            const manufacturer = await this.uow._models.Manufacturer
                 .query(this.uow._transaction)
                 .insert({name: name, config: JSON.stringify(config)});
-            return true;
+            return manufacturer;
         } catch (err) {
             this.uow._logger.error('Failed to add a manufacturer to the database');
             this.uow._logger.error(err);
@@ -59,10 +59,10 @@ class ConfigurationRepository {
 
     async createFamily(name, manufacturer, config) {
         try {
-            await this.uow._models.Family
+            const family = await this.uow._models.Family
                 .query(this.uow._transaction)
                 .insert({name: name, config: JSON.stringify(config), manufacturer: manufacturer});
-            return true;
+            return family;
         } catch (err) {
             this.uow._logger.error('Failed to add a family to the database');
             this.uow._logger.error(err);
@@ -72,10 +72,10 @@ class ConfigurationRepository {
 
     async createModel(name, family, config) {
         try {
-            await this.uow._models.PhoneModel
+            const model = await this.uow._models.PhoneModel
                 .query(this.uow._transaction)
                 .insert({name: name, config: JSON.stringify(config), family: family});
-            return true;
+            return model;
         } catch (err) {
             this.uow._logger.error('Failed to add a phone model to the database');
             this.uow._logger.error(err);

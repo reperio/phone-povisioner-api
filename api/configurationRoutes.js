@@ -6,9 +6,13 @@ module.exports = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug('Fetching all manufacturers');
-
-            return await uow.configurationRepository.getManufacturers();
+            try {
+                const manufacturers = await uow.configurationRepository.getManufacturers();
+                logger.debug('Fetching all manufacturers');
+                return manufacturers;
+            } catch(e) {
+                return h.response().code(500);
+            }
         },
         config: {
             auth: false
@@ -21,9 +25,13 @@ module.exports = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Fetching all families from manufacturer ${request.params.manufacturer}`);
-
-            return await uow.configurationRepository.getFamilies(request.params.manufacturer);
+            try {
+                const families = await uow.configurationRepository.getFamilies(request.params.manufacturer);
+                logger.debug(`Fetching all families from manufacturer ${request.params.manufacturer}`);
+                return families;
+            } catch(e) {
+                return h.response().code(500);
+            }
         },
         config: {
             auth: false
@@ -36,9 +44,13 @@ module.exports = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Fetching all phone models from family ${request.params.family}`);
-
-            return await uow.configurationRepository.getModels(request.params.family);
+            try {
+                const models = await uow.configurationRepository.getModels(request.params.family);
+                logger.debug(`Fetching all phone models from family ${request.params.family}`);
+                return models;
+            } catch(e) {
+                return h.response().code(500);
+            }
         },
         config: {
             auth: false
@@ -51,10 +63,13 @@ module.exports = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(request.payload);
-            logger.debug(`Manufacturer ${request.payload.name} created with properties ${JSON.stringify(request.payload.config)}`);
-
-            return await uow.configurationRepository.createManufacturer(request.payload.name, request.payload.config);
+            try {
+                const manufacturer = await uow.configurationRepository.createManufacturer(request.payload.name, request.payload.config);
+                logger.debug(`Manufacturer ${request.payload.name} created with properties ${JSON.stringify(request.payload.config)}`);
+                return manufacturer;
+            } catch(e) {
+                return h.response().code(500);
+            }
         },
         config: {
             auth: false
@@ -67,9 +82,13 @@ module.exports = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Family ${request.payload.name} created with properties ${request.payload.config} for manufacturer ${JSON.stringify(request.payload.manufacturer)}`);
-
-            return await uow.configurationRepository.createFamily(request.payload.name, request.payload.manufacturer, request.payload.config);
+            try {
+                const family = await uow.configurationRepository.getFamilies(request.params.manufacturer);
+                logger.debug(`Family ${request.payload.name} created with properties ${request.payload.config} for manufacturer ${JSON.stringify(request.payload.manufacturer)}`);
+                return family;
+            } catch(e) {
+                return h.response().code(500);
+            }
         },
         config: {
             auth: false
@@ -82,9 +101,13 @@ module.exports = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Model ${request.payload.name} created with properties ${request.payload.config} for family ${JSON.stringify(request.payload.family)}`);
-
-            return await uow.configurationRepository.createModel(request.payload.name, request.payload.family, request.payload.config);
+            try {
+                const model = await uow.configurationRepository.createModel(request.payload.name, request.payload.family, request.payload.config);
+                logger.debug(`Model ${request.payload.name} created with properties ${request.payload.config} for family ${JSON.stringify(request.payload.family)}`);
+                return model;
+            } catch(e) {
+                return h.response().code(500);
+            }
         },
         config: {
             auth: false
@@ -97,9 +120,13 @@ module.exports = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Fetching composed config from ${request.params.model}`);
-
-            return await uow.configurationRepository.composeConfig(request.params.model);
+            try {
+                const config = await uow.configurationRepository.composeConfig(request.params.model);
+                logger.debug(`Fetching composed config from ${request.params.model}`);
+                return config;
+            } catch(e) {
+                return h.response().code(500);
+            }
         },
         config: {
             auth: false
