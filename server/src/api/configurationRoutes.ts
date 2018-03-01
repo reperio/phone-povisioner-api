@@ -85,7 +85,7 @@ const routes = [
             const logger = request.server.app.logger;
 
             try {
-                const family = await uow.configurationRepository.getFamilies(request.params.manufacturer);
+                const family = await uow.configurationRepository.createFamily();
                 logger.debug(`Family ${request.payload.name} created with properties ${request.payload.config} for manufacturer ${JSON.stringify(request.payload.manufacturer)}`);
                 return family;
             } catch(e) {
