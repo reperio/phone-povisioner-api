@@ -1,4 +1,4 @@
-import {UnitOfWork} from 'reperio-example-db/lib/unitOfWork';
+import {UnitOfWork} from 'phone-provisioner-db';
 import {Server} from 'hapijs-starter';
 import * as path from 'path';
 import {Request} from 'hapi';
