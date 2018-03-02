@@ -117,13 +117,32 @@ const routes = [
     },
     {
         method: 'GET',
-        path: '/config/compose/{model}',
+        path: '/config/compose-family/{family}',
         handler: async (request: Request, h: any) => {
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
             try {
-                const config = await uow.configurationRepository.composeConfig(request.params.model);
+                const config = await uow.configurationRepository.composeConfigFromFamily(request.params.family);
+                logger.debug(`Fetching composed config from ${request.params.model}`);
+                return config;
+            } catch(e) {
+                return h.response().code(500);
+            }
+        },
+        config: {
+            auth: false
+        }
+    },
+    {
+        method: 'GET',
+        path: '/config/compose-model/{model}',
+        handler: async (request: Request, h: any) => {
+            const uow = await request.app.getNewUoW();
+            const logger = request.server.app.logger;
+
+            try {
+                const config = await uow.configurationRepository.composeConfigFromModel(request.params.model);
                 logger.debug(`Fetching composed config from ${request.params.model}`);
                 return config;
             } catch(e) {

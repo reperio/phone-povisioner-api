@@ -90,7 +90,7 @@ export class ConfigurationRepository {
         }
     }
 
-    async composeConfig(modelId: string) {
+    async composeConfigFromModel(modelId: string) {
         try {
             const model = await PhoneModel
                 .query(this.uow.transaction)
@@ -107,6 +107,27 @@ export class ConfigurationRepository {
                 JSON.parse(manufacturer[0].config),
                 JSON.parse(family[0].config),
                 JSON.parse(model[0].config)
+            );
+        } catch (err) {
+            this.uow.logger.error('Failed to fetch config from database');
+            this.uow.logger.error(err);
+            throw err;
+        }
+    }
+
+    async composeConfigFromFamily(familyId: string) {
+        try {
+            const family = await Family
+                .query(this.uow.transaction)
+                .where('id', familyId);
+            const manufacturer = await Manufacturer
+                .query(this.uow.transaction)
+                .where('id', family[0].manufacturer);
+
+            return Object.assign(
+                {},
+                JSON.parse(manufacturer[0].config),
+                JSON.parse(family[0].config)
             );
         } catch (err) {
             this.uow.logger.error('Failed to fetch config from database');
