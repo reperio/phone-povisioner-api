@@ -8,6 +8,8 @@ const routes = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
+            logger.debug(`Running /config/manufacturers. Raw params:\n${JSON.stringify(request.params)}`);
+
             try {
                 const manufacturers = await uow.configurationRepository.getManufacturers();
                 logger.debug('Fetching all manufacturers');
@@ -26,6 +28,8 @@ const routes = [
         handler: async (request: Request, h: any) => {
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
+
+            logger.debug(`Running /config/families. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
                 const families = await uow.configurationRepository.getFamilies(request.params.manufacturer);
@@ -46,6 +50,8 @@ const routes = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
+            logger.debug(`Running /config/models. Raw params:\n${JSON.stringify(request.params)}`);
+
             try {
                 const models = await uow.configurationRepository.getModels(request.params.family);
                 logger.debug(`Fetching all phone models from family ${request.params.family}`);
@@ -64,6 +70,8 @@ const routes = [
         handler: async (request: Request, h: any) => {
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
+
+            logger.debug(`Running /config/create-manufacturer. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
                 const manufacturer = await uow.configurationRepository.createManufacturer(request.payload.name, request.payload.config);
@@ -84,6 +92,8 @@ const routes = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
+            logger.debug(`Running /config/create-family. Raw payload:\n${JSON.stringify(request.payload)}`);
+
             try {
                 const family = await uow.configurationRepository.createFamily();
                 logger.debug(`Family ${request.payload.name} created with properties ${request.payload.config} for manufacturer ${JSON.stringify(request.payload.manufacturer)}`);
@@ -102,6 +112,8 @@ const routes = [
         handler: async (request: Request, h: any) => {
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
+
+            logger.debug(`Running /config/create-model. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
                 const model = await uow.configurationRepository.createModel(request.payload.name, request.payload.family, request.payload.config);
@@ -122,6 +134,8 @@ const routes = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
+            logger.debug(`Running /config/compose-family. Raw params:\n${JSON.stringify(request.params)}`);
+
             try {
                 const config = await uow.configurationRepository.composeConfigFromFamily(request.params.family);
                 logger.debug(`Fetching composed config from ${request.params.model}`);
@@ -140,6 +154,8 @@ const routes = [
         handler: async (request: Request, h: any) => {
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
+
+            logger.debug(`Running /config/compose-model. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
                 const config = await uow.configurationRepository.composeConfigFromModel(request.params.model);
