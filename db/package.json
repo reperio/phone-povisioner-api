@@ -6,7 +6,8 @@
   "typings": "./lib/unitOfWork.d.ts",
   "scripts": {
     "build": "tsc && cp -r config lib",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate": "knex migrate:latest"
   },
   "author": "Seven Hills Technology",
   "license": "ISC",

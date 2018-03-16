@@ -95,7 +95,8 @@ const routes = [
             logger.debug(`Running /config/create-family. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
-                const family = await uow.configurationRepository.createFamily();
+                const family = await uow.configurationRepository.createFamily
+                    (request.payload.name, request.payload.manufacturer, request.payload.config);
                 logger.debug(`Family ${request.payload.name} created with properties ${request.payload.config} for manufacturer ${JSON.stringify(request.payload.manufacturer)}`);
                 return family;
             } catch(e) {
