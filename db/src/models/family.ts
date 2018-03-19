@@ -8,6 +8,7 @@ export class Family extends BaseModel {
     manufacturer: string;
     name: string;
     config: string;
+    component_name: string;
 
     static get tableName() {
         return 'families';

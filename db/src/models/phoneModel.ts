@@ -7,6 +7,7 @@ export class PhoneModel extends BaseModel {
     family: string;
     name: string;
     config: string;
+    component_name: string;
 
     static get tableName() {
         return 'models';

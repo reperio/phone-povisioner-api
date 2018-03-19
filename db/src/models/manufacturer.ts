@@ -6,6 +6,7 @@ export class Manufacturer extends BaseModel {
     id: string;
     name: string;
     config: string;
+    component_name: string;
 
     static get tableName() {
         return 'manufacturers';
