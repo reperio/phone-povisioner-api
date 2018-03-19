@@ -1,4 +1,4 @@
-import {UnitOfWork} from 'phone-provisioner-db';
+import {UnitOfWork} from '../../db';
 import {Server} from 'hapijs-starter';
 import * as path from 'path';
 import {Request} from 'hapi';

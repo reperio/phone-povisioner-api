@@ -1,4 +1,4 @@
-import {BaseUnitOfWork} from 'db-starter';
+import {BaseUnitOfWork} from 'reperio-db-starter';
 import {ConfigurationRepository} from "./repositories/configurationRepository";
 import {Winston} from 'winston';
 import {knex} from './connect';

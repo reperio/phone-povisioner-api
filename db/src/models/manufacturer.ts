@@ -1,4 +1,4 @@
-import {BaseModel} from 'db-starter';
+import {BaseModel} from 'reperio-db-starter';
 import {Relation} from 'objection';
 import {Family} from './family';
 
