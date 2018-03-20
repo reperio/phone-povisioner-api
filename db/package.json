@@ -6,18 +6,20 @@
   "typings": "./lib/unitOfWork.d.ts",
   "scripts": {
     "build": "tsc && cp -r config lib",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate": "knex migrate:latest"
   },
   "author": "Seven Hills Technology",
   "license": "ISC",
   "dependencies": {
-    "db-starter": "git+https://github.com/reperio/db-starter.git",
+    "reperio-db-starter": "^1.0.1",
     "knex": "^0.14.2",
     "nconf": "^0.10.0",
     "objection": "^0.9.4"
   },
   "devDependencies": {
     "@types/knex": "^0.14.5",
-    "@types/nconf": "0.0.37"
+    "@types/nconf": "0.0.37",
+    "typescript": "^2.7.2"
   }
 }
