@@ -57,3 +57,16 @@ typings/
 # dotenv environment variables file
 .env
 
+# .idea folder
+.idea/workspace.xml
+.idea/tasks.xml
+
+# Package lock
+*/package-lock.json
+
+.DS_Store
+
+# Build folders
+server/dist
+db/lib
+client/dist
