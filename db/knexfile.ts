@@ -46,4 +46,4 @@ const knex = {
 
 };
 
-export default knex;
+module.exports = knex;
