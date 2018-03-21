@@ -66,17 +66,17 @@ const routes = [
     },
     {
         method: 'POST',
-        path: '/config/create-manufacturer',
+        path: '/config/update-manufacturer-config',
         handler: async (request: Request, h: any) => {
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Running /config/create-manufacturer. Raw payload:\n${JSON.stringify(request.payload)}`);
+            logger.debug(`Running /config/update-manufacturer-config. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
-                const manufacturer = await uow.configurationRepository.createManufacturer(request.payload.name, request.payload.config);
-                logger.debug(`Manufacturer ${request.payload.name} created with properties ${JSON.stringify(request.payload.config)}`);
-                return manufacturer;
+                const newObj = await uow.configurationRepository.setManufacturerConfig(request.payload.id, request.payload.config);
+                logger.debug(`Manufacturer ${request.payload.id} updated with properties ${JSON.stringify(request.payload.config)}`);
+                return newObj;
             } catch(e) {
                 return h.response().code(500);
             }
@@ -87,18 +87,17 @@ const routes = [
     },
     {
         method: 'POST',
-        path: '/config/create-family',
+        path: '/config/update-family-config',
         handler: async (request: Request, h: any) => {
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Running /config/create-family. Raw payload:\n${JSON.stringify(request.payload)}`);
+            logger.debug(`Running /config/update-family-config. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
-                const family = await uow.configurationRepository.createFamily
-                    (request.payload.name, request.payload.manufacturer, request.payload.config);
-                logger.debug(`Family ${request.payload.name} created with properties ${request.payload.config} for manufacturer ${JSON.stringify(request.payload.manufacturer)}`);
-                return family;
+                const newObj = await uow.configurationRepository.setFamilyConfig(request.payload.id, request.payload.config);
+                logger.debug(`Family ${request.payload.id} updated with properties ${JSON.stringify(request.payload.config)}`);
+                return newObj;
             } catch(e) {
                 return h.response().code(500);
             }
@@ -109,59 +108,17 @@ const routes = [
     },
     {
         method: 'POST',
-        path: '/config/create-model',
+        path: '/config/update-model-config',
         handler: async (request: Request, h: any) => {
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Running /config/create-model. Raw payload:\n${JSON.stringify(request.payload)}`);
+            logger.debug(`Running /config/update-model-config. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
-                const model = await uow.configurationRepository.createModel(request.payload.name, request.payload.family, request.payload.config);
-                logger.debug(`Model ${request.payload.name} created with properties ${request.payload.config} for family ${JSON.stringify(request.payload.family)}`);
-                return model;
-            } catch(e) {
-                return h.response().code(500);
-            }
-        },
-        config: {
-            auth: false
-        }
-    },
-    {
-        method: 'GET',
-        path: '/config/compose-family/{family}',
-        handler: async (request: Request, h: any) => {
-            const uow = await request.app.getNewUoW();
-            const logger = request.server.app.logger;
-
-            logger.debug(`Running /config/compose-family. Raw params:\n${JSON.stringify(request.params)}`);
-
-            try {
-                const config = await uow.configurationRepository.composeConfigFromFamily(request.params.family);
-                logger.debug(`Fetching composed config from ${request.params.model}`);
-                return config;
-            } catch(e) {
-                return h.response().code(500);
-            }
-        },
-        config: {
-            auth: false
-        }
-    },
-    {
-        method: 'GET',
-        path: '/config/compose-model/{model}',
-        handler: async (request: Request, h: any) => {
-            const uow = await request.app.getNewUoW();
-            const logger = request.server.app.logger;
-
-            logger.debug(`Running /config/compose-model. Raw params:\n${JSON.stringify(request.params)}`);
-
-            try {
-                const config = await uow.configurationRepository.composeConfigFromModel(request.params.model);
-                logger.debug(`Fetching composed config from ${request.params.model}`);
-                return config;
+                const newObj = await uow.configurationRepository.setModelConfig(request.payload.id, request.payload.config);
+                logger.debug(`Model ${request.payload.id} updated with properties ${JSON.stringify(request.payload.config)}`);
+                return newObj;
             } catch(e) {
                 return h.response().code(500);
             }
