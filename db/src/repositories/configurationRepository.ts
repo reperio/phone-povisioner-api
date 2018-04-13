@@ -51,86 +51,43 @@ export class ConfigurationRepository {
         }
     }
 
-    async createManufacturer(name: string, config: object) {
+    async setManufacturerConfig(manufacturer: string, config: any) {
         try {
-            const manufacturer = await Manufacturer
+            const updatedObj = await Manufacturer
                 .query(this.uow.transaction)
-                .insert({name: name, config: JSON.stringify(config)});
-            return manufacturer;
+                .update({config: JSON.stringify(config)})
+                .where('id', manufacturer);
+            return updatedObj;
         } catch (err) {
-            this.uow.logger.error('Failed to add a manufacturer to the database');
+            this.uow.logger.error('Failed to set config of manufacturer');
             this.uow.logger.error(err);
             throw err;
         }
     }
 
-    async createFamily(name: string, manufacturer: string, config: object) {
+    async setFamilyConfig(family: string, config: any) {
         try {
-            const family = await Family
+            const updatedObj = await Family
                 .query(this.uow.transaction)
-                .insert({name: name, config: JSON.stringify(config), manufacturer: manufacturer});
-            return family;
+                .update({config: JSON.stringify(config)})
+                .where('id', family);
+            return updatedObj;
         } catch (err) {
-            this.uow.logger.error('Failed to add a family to the database');
+            this.uow.logger.error('Failed to set config of family');
             this.uow.logger.error(err);
             throw err;
         }
     }
 
-    async createModel(name: string, family: string, config: object) {
+    async setModelConfig(model: string, config: any) {
         try {
-            const model = PhoneModel
+            const updatedObj = await PhoneModel
                 .query(this.uow.transaction)
-                .insert({name: name, config: JSON.stringify(config), family: family});
-            return model;
+                .update({config: JSON.stringify(config)})
+                .where('id', model);
+            return updatedObj;
         } catch (err) {
-            this.uow.logger.error('Failed to add a phone model to the database');
-            this.uow.logger.error(err);
-            throw err;
-        }
-    }
-
-    async composeConfigFromModel(modelId: string) {
-        try {
-            const model = await PhoneModel
-                .query(this.uow.transaction)
-                .where('id', modelId);
-            const family = await Family
-                .query(this.uow.transaction)
-                .where('id', model[0].family);
-            const manufacturer = await Manufacturer
-                .query(this.uow.transaction)
-                .where('id', family[0].manufacturer);
-
-            return Object.assign(
-                {},
-                JSON.parse(manufacturer[0].config),
-                JSON.parse(family[0].config),
-                JSON.parse(model[0].config)
-            );
-        } catch (err) {
-            this.uow.logger.error('Failed to fetch config from database');
-            this.uow.logger.error(err);
-            throw err;
-        }
-    }
-
-    async composeConfigFromFamily(familyId: string) {
-        try {
-            const family = await Family
-                .query(this.uow.transaction)
-                .where('id', familyId);
-            const manufacturer = await Manufacturer
-                .query(this.uow.transaction)
-                .where('id', family[0].manufacturer);
-
-            return Object.assign(
-                {},
-                JSON.parse(manufacturer[0].config),
-                JSON.parse(family[0].config)
-            );
-        } catch (err) {
-            this.uow.logger.error('Failed to fetch config from database');
+            this.uow.logger.error('Failed to set config of model');
             this.uow.logger.error(err);
             throw err;
         }
