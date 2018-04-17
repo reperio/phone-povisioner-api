@@ -15,8 +15,8 @@ export class ConfigurationRepository {
         try {
             const manufacturers = await Manufacturer
                 .query(this.uow.transaction)
-                .select('c.properites as config', 'manufacturers.*')
-                .join('configs as c', 'manufacturers.id', 'configs.manufacturer')
+                .select('c.properties as config', 'manufacturers.*')
+                .join('configs as c', 'manufacturers.id', 'c.manufacturer')
                 .orderBy('name', 'ASC');
             return manufacturers;
         } catch (err) {
@@ -30,9 +30,9 @@ export class ConfigurationRepository {
         try {
             const families = await Family
                 .query(this.uow.transaction)
-                .select('c.properites as config', 'families.*')
-                .where('manufacturer', manufacturer)
-                .join('configs as c', 'families.id', 'configs.family')
+                .select('c.properties as config', 'families.*')
+                .where('families.manufacturer', manufacturer)
+                .join('configs as c', 'families.id', 'c.family')
                 .orderBy('name', 'ASC');
             return families;
         } catch (err) {
@@ -46,9 +46,9 @@ export class ConfigurationRepository {
         try {
             const models = await PhoneModel
                 .query(this.uow.transaction)
-                .select('c.properites as config', 'models.*')
-                .where('family', family)
-                .join('configs as c', 'models.id', 'configs.model')
+                .select('c.properties as config', 'models.*')
+                .where('models.family', family)
+                .join('configs as c', 'models.id', 'c.model')
                 .orderBy('name', 'ASC');
             return models;
         } catch (err) {
