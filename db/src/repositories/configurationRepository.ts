@@ -3,6 +3,7 @@ import {Manufacturer} from "../models/manufacturer";
 import {Family} from "../models/family";
 import {PhoneModel} from "../models/phoneModel";
 import {Config} from "../models/config";
+import {raw} from 'objection';
 
 export class ConfigurationRepository {
     uow: UnitOfWork;
@@ -11,13 +12,18 @@ export class ConfigurationRepository {
         this.uow = uow;
     }
 
-    async getManufacturers() {
+    async getManufacturers(organization: string) {
         try {
             const manufacturers = await Manufacturer
                 .query(this.uow.transaction)
-                .select('c.properties as config', 'manufacturers.*')
-                .join('configs as c', 'manufacturers.id', 'c.manufacturer')
-                .orderBy('name', 'ASC');
+                .select('c.properties as config', 'manufacturers.*', 'default_conf.properties as default_config')
+                .innerJoin('configs as c', function() {
+                    this.on('manufacturers.id', 'c.manufacturer')
+                        .andOn('c.organization', organization);
+                }).innerJoin('configs as default_conf', function() {
+                    this.on('manufacturers.id', 'default_conf.manufacturer')
+                        .andOn('(SELECT is_global_organization from organizations where id = default_conf.organization)', 'TRUE');//These are both recognized as strings
+                }).orderBy('name', 'ASC');
             return manufacturers;
         } catch (err) {
             this.uow.logger.error('Failed to fetch manufacturers from database');

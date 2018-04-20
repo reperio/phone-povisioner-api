@@ -11,7 +11,7 @@ const routes = [
             logger.debug(`Running /config/manufacturers. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
-                const manufacturers = await uow.configurationRepository.getManufacturers();
+                const manufacturers = await uow.configurationRepository.getManufacturers('1');
                 logger.debug('Fetching all manufacturers');
                 return manufacturers;
             } catch(e) {
