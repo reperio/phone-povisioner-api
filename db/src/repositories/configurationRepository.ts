@@ -19,10 +19,10 @@ export class ConfigurationRepository {
                 .select('c.properties as config', 'manufacturers.*', 'default_conf.properties as default_config')
                 .innerJoin('configs as c', function() {
                     this.on('manufacturers.id', 'c.manufacturer')
-                        .andOn('c.organization', organization);
+                        .andOn(raw('c.organization = ?', organization));
                 }).innerJoin('configs as default_conf', function() {
                     this.on('manufacturers.id', 'default_conf.manufacturer')
-                        .andOn('(SELECT is_global_organization from organizations where id = default_conf.organization)', 'TRUE');//These are both recognized as strings
+                        .andOn(raw('(SELECT is_global_organization from organizations where id = default_conf.organization) = TRUE'));
                 }).orderBy('name', 'ASC');
             return manufacturers;
         } catch (err) {
@@ -32,14 +32,19 @@ export class ConfigurationRepository {
         }
     }
 
-    async getFamilies(manufacturer: string) {
+    async getFamilies(manufacturer: string, organization: string) {
         try {
             const families = await Family
                 .query(this.uow.transaction)
-                .select('c.properties as config', 'families.*')
+                .select('c.properties as config', 'families.*', 'default_conf.properties as default_config')
                 .where('families.manufacturer', manufacturer)
-                .join('configs as c', 'families.id', 'c.family')
-                .orderBy('name', 'ASC');
+                .innerJoin('configs as c', function() {
+                    this.on('families.id', 'c.family')
+                        .andOn(raw('c.organization = ?', organization));
+                }).innerJoin('configs as default_conf', function() {
+                    this.on('families.id', 'default_conf.family')
+                        .andOn(raw('(SELECT is_global_organization from organizations where id = default_conf.organization) = TRUE'));
+                }).orderBy('name', 'ASC');
             return families;
         } catch (err) {
             this.uow.logger.error('Failed to fetch families from database');
@@ -48,14 +53,19 @@ export class ConfigurationRepository {
         }
     }
 
-    async getModels(family: string) {
+    async getModels(family: string, organization: string) {
         try {
             const models = await PhoneModel
                 .query(this.uow.transaction)
-                .select('c.properties as config', 'models.*')
+                .select('c.properties as config', 'models.*', 'default_conf.properties as default_config')
                 .where('models.family', family)
-                .join('configs as c', 'models.id', 'c.model')
-                .orderBy('name', 'ASC');
+                .innerJoin('configs as c', function() {
+                    this.on('models.id', 'c.model')
+                        .andOn(raw('c.organization = ?', organization));
+                }).innerJoin('configs as default_conf', function() {
+                    this.on('models.id', 'default_conf.model')
+                        .andOn(raw('(SELECT is_global_organization from organizations where id = default_conf.organization) = TRUE'));
+                }).orderBy('name', 'ASC');
             return models;
         } catch (err) {
             this.uow.logger.error('Failed to fetch families from database');
@@ -64,12 +74,13 @@ export class ConfigurationRepository {
         }
     }
 
-    async setManufacturerConfig(manufacturer: string, config: any) {
+    async setManufacturerConfig(manufacturer: string, config: any, organization: string) {
         try {
             const updatedObj = await Config
                 .query(this.uow.transaction)
                 .update({properties: JSON.stringify(config)})
-                .where('manufacturer', manufacturer); //Check organization too
+                .where('manufacturer', manufacturer)
+                .andWhere('organization', organization);
             return updatedObj;
         } catch (err) {
             this.uow.logger.error('Failed to set config of manufacturer');
@@ -78,12 +89,13 @@ export class ConfigurationRepository {
         }
     }
 
-    async setFamilyConfig(family: string, config: any) {
+    async setFamilyConfig(family: string, config: any, organization: string) {
         try {
             const updatedObj = await Config
                 .query(this.uow.transaction)
                 .update({properties: JSON.stringify(config)})
-                .where('family', family); //Check organization too
+                .where('family', family)
+                .andWhere('organization', organization);
             return updatedObj;
         } catch (err) {
             this.uow.logger.error('Failed to set config of family');
@@ -92,12 +104,13 @@ export class ConfigurationRepository {
         }
     }
 
-    async setModelConfig(model: string, config: any) {
+    async setModelConfig(model: string, config: any, organization: string) {
         try {
             const updatedObj = await Config
                 .query(this.uow.transaction)
                 .update({properties: JSON.stringify(config)})
-                .where('model', model); //Check organization too
+                .where('model', model)
+                .andWhere('organization', organization);
             return updatedObj;
         } catch (err) {
             this.uow.logger.error('Failed to set config of model');
