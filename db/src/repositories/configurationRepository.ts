@@ -3,6 +3,7 @@ import {Manufacturer} from "../models/manufacturer";
 import {Family} from "../models/family";
 import {PhoneModel} from "../models/phoneModel";
 import {Config} from "../models/config";
+import {Organization} from "../models/organization";
 import {raw} from 'objection';
 
 export class ConfigurationRepository {
@@ -114,6 +115,33 @@ export class ConfigurationRepository {
             return updatedObj;
         } catch (err) {
             this.uow.logger.error('Failed to set config of model');
+            this.uow.logger.error(err);
+            throw err;
+        }
+    }
+
+    async addOrganization(id: string, name: string) {
+        try {
+            //Add organization row
+            await Organization
+                .query(this.uow.transaction)
+                .insert({id, name, is_global_organization: false});
+            //Add all configs from the default config
+            const defaultConfigs = await Config
+                .query(this.uow.transaction)
+                .where('o.is_global_organization', true)
+                .join('organizations as o', 'o.id', 'configs.organization');
+            await Config
+                .query(this.uow.transaction)
+                .insert(defaultConfigs.map((c:Config) => {
+                    organization: id,
+                    manufacturer: c.manufacturer,
+                    family: c.family,
+                    model: c.model,
+                    properties: '{}'
+                }));
+        } catch (err) {
+            this.uow.logger.error('Failed to add organization');
             this.uow.logger.error(err);
             throw err;
         }
