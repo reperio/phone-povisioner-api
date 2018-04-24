@@ -21,6 +21,26 @@ const routes = [
         config: {
             auth: false
         }
+    },
+    {
+        method: 'GET',
+        path: '/{model}.sip.ld',
+        handler: async (request, h) => {
+            return fs_1.readFileSync('./static/2345-12375-001.sip.ld');
+        },
+        config: {
+            auth: false
+        }
+    },
+    {
+        method: 'GET',
+        path: '/{model}.bootrom.ld',
+        handler: async (request, h) => {
+            return fs_1.readFileSync('./static/2345-12375-001.bootrom.ld'); //Add actual file
+        },
+        config: {
+            auth: false
+        }
     }
 ];
 exports.default = routes;
