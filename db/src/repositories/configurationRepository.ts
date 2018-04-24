@@ -133,13 +133,13 @@ export class ConfigurationRepository {
                 .join('organizations as o', 'o.id', 'configs.organization');
             await Config
                 .query(this.uow.transaction)
-                .insert(defaultConfigs.map((c:Config) => {
+                .insert(defaultConfigs.map((c:Config) => ({
                     organization: id,
                     manufacturer: c.manufacturer,
                     family: c.family,
                     model: c.model,
                     properties: '{}'
-                }));
+                })));
         } catch (err) {
             this.uow.logger.error('Failed to add organization');
             this.uow.logger.error(err);
