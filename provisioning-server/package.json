@@ -1,7 +1,7 @@
 {
-  "name": "phone-configuration-api",
+  "name": "phone-provisioner-api",
   "version": "1.0.0",
-  "description": "API for managing phone configurations",
+  "description": "API to send configurations to phones",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "scripts": {
