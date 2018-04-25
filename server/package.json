@@ -1,5 +1,5 @@
 {
-  "name": "phone-provisioner-api",
+  "name": "phone-configuration-api",
   "version": "1.0.0",
   "description": "API for managing phone configurations",
   "main": "./dist/index.js",

@@ -1,0 +1,23 @@
+{
+  "name": "phone-provisioner-api",
+  "version": "1.0.0",
+  "description": "API to send configurations to phones",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node ./dist/index.js",
+    "test": "./node_modules/.bin/mocha --compilers ts:ts-node/register ./test/*.spec.ts"
+  },
+  "author": "Seven Hills Technology",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^9.3.0",
+    "hapijs-starter": "^3.1.0",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "ts-node": "^4.1.0",
+    "typescript": "^2.6.2"
+  }
+}
