@@ -74,6 +74,7 @@ exports.up = async knex => {
             .references('models.id');
         t.text('properties')
             .notNullable();
+        t.unique(['organization', 'manufacturer', 'family', 'model']);
     });
 
     const newColumnsAndConfigs = [

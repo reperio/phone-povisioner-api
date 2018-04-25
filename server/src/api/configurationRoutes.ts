@@ -116,9 +116,30 @@ const routes = [
             logger.debug(`Running /config/update-model-config. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
-                const newObj = await uow.configurationRepository.setModelConfig(request.payload.id, request.payload.config);
+                const newObj = await uow.configurationRepository.setModelConfig(request.payload.id, request.payload.config, request.params.organization);
                 logger.debug(`Model ${request.payload.id} updated with properties ${JSON.stringify(request.payload.config)} in organization ${request.params.organization}`);
                 return newObj;
+            } catch(e) {
+                return h.response().code(500);
+            }
+        },
+        config: {
+            auth: false
+        }
+    },
+    {
+        method: 'GET',
+        path: '/config/organizations',
+        handler: async (request: Request, h: any) => {
+            const uow = await request.app.getNewUoW();
+            const logger = request.server.app.logger;
+
+            logger.debug(`Running /config/organizations.`);
+
+            try {
+                const models = await uow.organizationRepository.getOrganizations();
+                logger.debug(`Fetching all organizations.`);
+                return models;
             } catch(e) {
                 return h.response().code(500);
             }
