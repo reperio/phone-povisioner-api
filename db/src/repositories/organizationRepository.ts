@@ -4,7 +4,7 @@ import {Family} from "../models/family";
 import {PhoneModel} from "../models/phoneModel";
 import {Config} from "../models/config";
 import {Organization} from "../models/organization";
-import {raw, transaction} from 'objection';
+import {transaction} from 'objection';
 
 export class OrganizationRepository {
     uow: UnitOfWork;
@@ -28,6 +28,7 @@ export class OrganizationRepository {
     async addOrganization(id: string, name: string) {
         try {
             //Add all configs from the default config
+            //TODO: could this be made into a subquery?
             const defaultConfigs = await Config
                 .query(this.uow.transaction)
                 .where('o.is_global_organization', true)
@@ -38,7 +39,18 @@ export class OrganizationRepository {
             //Add organization row
             await Organization
                 .query(this.uow.transaction)
-                .insert({id, name, is_global_organization: false});
+                .insert({id, name, is_global_organization: false})
+                .onError(async (error: any, query: any) => {
+                    if(error.code === '23505') { //Duplicate column
+                        await Organization
+                            .query(this.uow.transaction)
+                            .update({name})
+                            .where('id', id);
+                    } else {
+                        return Promise.reject(error);
+                    }
+                });
+            //Adds the config options for the organization
             await Config
                 .query(this.uow.transaction)
                 .insert(defaultConfigs.map((c:Config) => ({
@@ -48,7 +60,12 @@ export class OrganizationRepository {
                     model: c.model,
                     properties: '{}'
                 })))
-                .returning('organization');
+                .returning('organization')
+                .onError(async (error: any, query: any) => {
+                    if(error.code !== '23505') { //Duplicate column
+                        return Promise.reject(error);
+                    }
+                });
             //await this.uow.commitTransaction();
         } catch (err) {
             this.uow.logger.error('Failed to add organization');
