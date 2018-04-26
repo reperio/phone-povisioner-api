@@ -14,8 +14,7 @@ const logger = new Logger({
             colorize: true
         }),
         new transports.DailyRotateFile({
-            filename: `./logs/app.log`,
-            datePattern: 'yyyy-MM-dd.',
+            filename: `./logs/%DATE%.app.log`,
             createTree: true,
             prepend: true,
             level: 'debug',

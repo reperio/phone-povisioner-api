@@ -15,8 +15,7 @@ const logger = new winston_1.Logger({
             colorize: true
         }),
         new winston_1.transports.DailyRotateFile({
-            filename: `./logs/app.log`,
-            datePattern: 'yyyy-MM-dd.',
+            filename: `./logs/%DATE%.app.log`,
             createTree: true,
             prepend: true,
             level: 'debug',
