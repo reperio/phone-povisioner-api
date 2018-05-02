@@ -12,14 +12,14 @@
   "author": "Seven Hills Technology",
   "license": "ISC",
   "dependencies": {
-    "knex": "^0.14.2",
+    "knex": "^0.14.6",
     "nconf": "^0.10.0",
     "objection": "^0.9.4",
     "pg": "^7.4.1",
     "reperio-db-starter": "^1.0.1"
   },
   "devDependencies": {
-    "@types/knex": "^0.14.5",
+    "@types/knex": "^0.14.12",
     "@types/nconf": "0.0.37",
     "typescript": "^2.7.2"
   }

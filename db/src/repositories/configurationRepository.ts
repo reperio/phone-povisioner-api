@@ -3,8 +3,7 @@ import {Manufacturer} from "../models/manufacturer";
 import {Family} from "../models/family";
 import {PhoneModel} from "../models/phoneModel";
 import {Config} from "../models/config";
-import {Organization} from "../models/organization";
-import {raw, transaction} from 'objection';
+import {raw} from 'objection';
 
 export class ConfigurationRepository {
     uow: UnitOfWork;
