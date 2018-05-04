@@ -117,7 +117,19 @@ exports.up = async knex => {
                 model: '1ceebd84-b735-4a90-ac51-854c7ac01b2c',
                 properties: JSON.stringify(soundpointIP335Config)
             }
-        ])
+        ]),
+        knex('manufacturers')
+            .where('id', 'fb6c87ee-5968-45f4-bf3e-0d82d812fec7')
+            .update({component_name: 'polycomConfig'}),
+        knex('families')
+            .where('id', '188a8ddd-9a57-4f45-aac2-effd96933039')
+            .update({component_name: 'soundpointIPConfig'}),
+        knex('models')
+            .where('id', '1ceebd84-b735-4a90-ac51-854c7ac01b2c')
+            .update({component_name: 'soundpointIP335Config'}),
+        knex('models')
+            .where('id', '646e4a66-823c-48fc-80e1-547cb5f67532')
+            .update({component_name: 'soundpointIP330Config'})
     ];
 
     await Promise.all(newColumnsAndConfigs);
