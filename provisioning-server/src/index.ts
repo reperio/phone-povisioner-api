@@ -2,11 +2,12 @@ import {UnitOfWork} from '../../db';
 import {Server} from 'hapijs-starter';
 import * as path from 'path';
 import {Request} from 'hapi';
-import provisioningRoutes from './api/provisioningRoutes'
+import provisioningRoutes from './api/provisioningRoutes';
+import {Config} from './config';
 
 async function startServer() : Promise<void> {
     try {
-        const server = new Server({authEnabled: false});
+        const server = new Server({authEnabled: false, port: Config.port});
         await server.registerAdditionalRoutes(provisioningRoutes);
 
         await server.registerExtension({
