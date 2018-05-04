@@ -3,7 +3,6 @@ import {Manufacturer} from "../models/manufacturer";
 import {Family} from "../models/family";
 import {PhoneModel} from "../models/phoneModel";
 import {Config} from "../models/config";
-import {raw} from 'objection';
 
 export class ConfigurationRepository {
     uow: UnitOfWork;
@@ -13,6 +12,7 @@ export class ConfigurationRepository {
     }
 
     async getManufacturers(organization: string) {
+        const raw = this.uow.knex.raw;
         try {
             const manufacturers = await Manufacturer
                 .query(this.uow.transaction)
@@ -33,6 +33,7 @@ export class ConfigurationRepository {
     }
 
     async getFamilies(manufacturer: string, organization: string) {
+        const raw = this.uow.knex.raw;
         try {
             const families = await Family
                 .query(this.uow.transaction)
@@ -54,6 +55,7 @@ export class ConfigurationRepository {
     }
 
     async getModels(family: string, organization: string) {
+        const raw = this.uow.knex.raw;
         try {
             const models = await PhoneModel
                 .query(this.uow.transaction)
