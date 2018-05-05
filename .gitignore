@@ -70,3 +70,4 @@ typings/
 server/dist
 db/lib
 client/dist
+package/
