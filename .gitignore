@@ -71,3 +71,4 @@ server/dist
 db/lib
 client/dist
 package/
+phone-provisioner-api.tar.gz
