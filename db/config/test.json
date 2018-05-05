@@ -1,0 +1,10 @@
+{
+  "knex": {
+    "client": "pg",
+    "connection": {
+      "host": process.env.PG_CONNECTION_HOST,
+      "user": process.env.PG_CONNECTION_USER,
+      "database": "phone_provisioner"
+    }
+  }
+}
