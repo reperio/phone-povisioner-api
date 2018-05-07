@@ -1,8 +1,9 @@
 const knex = {
 
     development: {
-        client: "postgresql",
+        client: "pg",
         connection: {
+            host: "127.0.0.1",
             database: "phone_provisioner",
             user: "postgres",
             password: "postgres"
@@ -12,8 +13,20 @@ const knex = {
         }
     },
 
+    test: {
+        client: "pg",
+        connection: {
+            host: process.env.PG_CONNECTION_HOST,
+            database: "phone_provisioner",
+            user: process.env.PG_CONNECTION_USER
+        },
+        migrations: {
+            tableName: "migrations"
+        }
+    },
+
     staging: {
-        client: "postgresql",
+        client: "pg",
         connection: {
             database: "phone_provisioner",
             user: "postgres",
@@ -29,7 +42,7 @@ const knex = {
     },
 
     production: {
-        client: "postgresql",
+        client: "pg",
         connection: {
             database: "phone_provisioner",
             user: "postgres",
