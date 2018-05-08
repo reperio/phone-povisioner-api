@@ -16,7 +16,8 @@ export class OrganizationRepository {
     async getOrganizations() {
         try {
             const organizations = await Organization
-                .query(this.uow.transaction);
+                .query(this.uow.transaction)
+                .where('enabled', true);
             return organizations;
         } catch (err) {
             this.uow.logger.error('Failed to fetch organizations from database');
@@ -34,17 +35,15 @@ export class OrganizationRepository {
                 .where('o.is_global_organization', true)
                 .join('organizations as o', 'o.id', 'configs.organization');
 
-            //TODO: have these two queries in a single transaction
-            //await this.uow.beginTransaction();
             //Add organization row
             await Organization
                 .query(this.uow.transaction)
-                .insert({id, name, is_global_organization: false})
+                .insert({id, name, is_global_organization: false, enabled: true})
                 .onError(async (error: any, query: any) => {
                     if(error.code === '23505') { //Duplicate column
                         await Organization
                             .query(this.uow.transaction)
-                            .update({name})
+                            .update({name, enabled: true})
                             .where('id', id);
                     } else {
                         return Promise.reject(error);
@@ -66,9 +65,23 @@ export class OrganizationRepository {
                         return Promise.reject(error);
                     }
                 });
-            //await this.uow.commitTransaction();
         } catch (err) {
             this.uow.logger.error('Failed to add organization');
+            this.uow.logger.error(err);
+            throw err;
+        }
+    }
+
+    async disableOldOrganizations(ids: string[]) {
+        try {
+            const organizations = await Organization
+                .query(this.uow.transaction)
+                .update({enabled: false})
+                .whereIn('id', ids)
+                .andWhere('is_global_organization', false);
+            return organizations;
+        } catch (err) {
+            this.uow.logger.error('Failed to disable organizations');
             this.uow.logger.error(err);
             throw err;
         }

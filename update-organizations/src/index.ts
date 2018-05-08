@@ -49,7 +49,15 @@ async function fetchOrganizations() : Promise<any[]> {
 async function syncOrganizations() : Promise<void> {
     const uow = new UnitOfWork(logger);
 
+    const cachedOrganizations = await uow.organizationRepository.getOrganizations();
     const organizations = await fetchOrganizations();
+
+    logger.info('Removing old organizations from the database');
+    await uow.organizationRepository.disableOldOrganizations(
+        cachedOrganizations
+            .filter((org: any) => organizations.findIndex((o: any) => o.id == org.id) < 0)
+            .map((org: any) => org.id)
+    );
 
     logger.info('Adding new organizations to the database');
     let queries: Promise<any>[] = [];

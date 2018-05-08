@@ -49,12 +49,16 @@ exports.up = async knex => {
         t.boolean('is_global_organization')
             .defaultTo(false)
             .notNullable();
+        t.boolean('enabled')
+            .defaultTo(true)
+            .notNullable();
         t.text('name');
     });
 
     await knex('organizations').insert({
         id: '0',
         is_global_organization: true,
+        enabled: true,
         name: 'Global'
     });
 
