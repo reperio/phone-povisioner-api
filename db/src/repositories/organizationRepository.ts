@@ -1,10 +1,6 @@
 import {UnitOfWork} from '../unitOfWork';
-import {Manufacturer} from "../models/manufacturer";
-import {Family} from "../models/family";
-import {PhoneModel} from "../models/phoneModel";
 import {Config} from "../models/config";
 import {Organization} from "../models/organization";
-import {transaction} from 'objection';
 
 export class OrganizationRepository {
     uow: UnitOfWork;
@@ -35,36 +31,34 @@ export class OrganizationRepository {
                 .where('o.is_global_organization', true)
                 .join('organizations as o', 'o.id', 'configs.organization');
 
+            //ON CONFLICT is not supported in Objection, so we have to use raw queries
             //Add organization row
-            await Organization
-                .query(this.uow.transaction)
-                .insert({id, name, is_global_organization: false, enabled: true})
-                .onError(async (error: any, query: any) => {
-                    if(error.code === '23505') { //Duplicate column
-                        await Organization
-                            .query(this.uow.transaction)
-                            .update({name, enabled: true})
-                            .where('id', id);
-                    } else {
-                        return Promise.reject(error);
-                    }
-                });
+            await this.uow.transaction.raw(`
+                insert into "organizations"
+                    ("enabled", "id", "is_global_organization", "name")
+                    values (true, ?, false, ?)
+                on conflict ("id") do update
+                    set "name" = ?, enabled = true where "organizations"."id" = ?
+                returning "id"
+            `, [id, name, name, id]);
+
             //Adds the config options for the organization
-            await Config
-                .query(this.uow.transaction)
-                .insert(defaultConfigs.map((c:Config) => ({
-                    organization: id,
-                    manufacturer: c.manufacturer,
-                    family: c.family,
-                    model: c.model,
-                    properties: '{}'
-                })))
-                .returning('organization')
-                .onError(async (error: any, query: any) => {
-                    if(error.code !== '23505') { //Duplicate column
-                        return Promise.reject(error);
-                    }
-                });
+            let values = '(?, ?, ?, ?, ?), '.repeat(defaultConfigs.length);
+            values = values.substring(0, values.length - 2);
+            let parameters: any[] = [];
+            defaultConfigs.forEach((c: Config) => {
+                parameters.push(id);
+                parameters.push(c.manufacturer);
+                parameters.push(c.family);
+                parameters.push(c.model);
+                parameters.push('{}');
+            });
+            await this.uow.transaction.raw(`
+                insert into "configs" ("organization", "manufacturer", "family", "model", "properties")
+                    values ${values}
+                on conflict do nothing
+                returning "organization";
+            `, parameters);
         } catch (err) {
             this.uow.logger.error('Failed to add organization');
             this.uow.logger.error(err);
