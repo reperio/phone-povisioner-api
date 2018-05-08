@@ -43,19 +43,27 @@ async function fetchOrganizations() {
 }
 async function syncOrganizations() {
     const uow = new db_1.UnitOfWork(logger);
-    const cachedOrganizations = await uow.organizationRepository.getOrganizations();
-    const organizations = await fetchOrganizations();
-    logger.info('Removing old organizations from the database');
-    await uow.organizationRepository.disableOldOrganizations(cachedOrganizations
-        .filter((org) => organizations.findIndex((o) => o.id == org.id) < 0)
-        .map((org) => org.id));
-    logger.info('Adding new organizations to the database');
-    let queries = [];
-    organizations.forEach((org) => {
-        queries.push(uow.organizationRepository.addOrganization(org.id, org.name));
-    });
-    await Promise.all(queries);
-    logger.info('Finished syncing organizations');
+    try {
+        const cachedOrganizations = await uow.organizationRepository.getOrganizations();
+        const organizations = await fetchOrganizations();
+        await uow.beginTransaction();
+        logger.info('Removing old organizations from the database');
+        await uow.organizationRepository.disableOldOrganizations(cachedOrganizations
+            .filter((org) => organizations.findIndex((o) => o.id == org.id) < 0)
+            .map((org) => org.id));
+        logger.info('Adding new organizations to the database');
+        for (let i = 0; i < organizations.length; i++) {
+            const org = organizations[i];
+            await uow.organizationRepository.addOrganization(org.id, org.name);
+        }
+        await uow.commitTransaction();
+        logger.info('Finished syncing organizations');
+    }
+    catch (e) {
+        logger.error('Failed to update organizations');
+        logger.error(e);
+        await uow.rollbackTransaction();
+    }
     process.exit();
 }
 syncOrganizations();
