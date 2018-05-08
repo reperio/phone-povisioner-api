@@ -12,6 +12,9 @@ const routes = [
 
             try {
                 const manufacturers = await uow.configurationRepository.getManufacturers(request.params.organization);
+                if(manufacturers.length === 0) {
+                    return h.response().code(404);
+                }
                 logger.debug(`Fetching all manufacturers from organization ${request.params.organization}`);
                 return manufacturers;
             } catch(e) {
@@ -33,6 +36,9 @@ const routes = [
 
             try {
                 const families = await uow.configurationRepository.getFamilies(request.params.manufacturer, request.params.organization);
+                if(families.length === 0) {
+                    return h.response().code(404);
+                }
                 logger.debug(`Fetching all families from manufacturer ${request.params.manufacturer} in organization ${request.params.organization}`);
                 return families;
             } catch(e) {
@@ -54,6 +60,9 @@ const routes = [
 
             try {
                 const models = await uow.configurationRepository.getModels(request.params.family, request.params.organization);
+                if(models.length === 0) {
+                    return h.response().code(404);
+                }
                 logger.debug(`Fetching all phone models from family ${request.params.family} in organization ${request.params.organization}`);
                 return models;
             } catch(e) {
@@ -75,6 +84,9 @@ const routes = [
 
             try {
                 const newObj = await uow.configurationRepository.setManufacturerConfig(request.payload.id, request.payload.config, request.params.organization);
+                if(newObj === 0) {
+                    return h.response().code(404);
+                }
                 logger.debug(`Manufacturer ${request.payload.id} updated with properties ${JSON.stringify(request.payload.config)} in organization ${request.params.organization}`);
                 return newObj;
             } catch(e) {
@@ -96,6 +108,9 @@ const routes = [
 
             try {
                 const newObj = await uow.configurationRepository.setFamilyConfig(request.payload.id, request.payload.config, request.params.organization);
+                if(newObj === 0) {
+                    return h.response().code(404);
+                }
                 logger.debug(`Family ${request.payload.id} updated with properties ${JSON.stringify(request.payload.config)} in organization ${request.params.organization}`);
                 return newObj;
             } catch(e) {
@@ -117,6 +132,9 @@ const routes = [
 
             try {
                 const newObj = await uow.configurationRepository.setModelConfig(request.payload.id, request.payload.config, request.params.organization);
+                if(newObj === 0) {
+                    return h.response().code(404);
+                }
                 logger.debug(`Model ${request.payload.id} updated with properties ${JSON.stringify(request.payload.config)} in organization ${request.params.organization}`);
                 return newObj;
             } catch(e) {
