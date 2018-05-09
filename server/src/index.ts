@@ -6,8 +6,7 @@ import {Config} from './config';
 
 async function startServer() : Promise<void> {
     try {
-        const server = new Server({authEnabled: false, port: Config.port});
-        await server.registerRoutesFromDirectory(path.resolve(__dirname, './api'));
+        const server = new Server({authEnabled: false, corsOrigins: ['*'], port: Config.port});
 
         await server.registerExtension({
             type: 'onRequest',
@@ -25,6 +24,7 @@ async function startServer() : Promise<void> {
         });
 
         await server.startServer();
+        await server.registerRoutesFromDirectory(path.resolve(__dirname, './api'));
     } catch(e) {
         console.log(e);
     }

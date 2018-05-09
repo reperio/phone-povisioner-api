@@ -1,20 +1,23 @@
 {
-  "name": "phone-configuration-api",
+  "name": "update-organizations",
   "version": "1.0.0",
-  "description": "API for managing phone configurations",
+  "description": "Syncs organizations from Kazoo to our database",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "start": "NODE_ENV=development node ./dist/index.js",
+    "build-start": "npm run build && npm run start",
     "test": "./node_modules/.bin/mocha --compilers ts:ts-node/register ./test/*.spec.ts"
   },
   "author": "Seven Hills Technology",
   "license": "ISC",
   "dependencies": {
     "@types/node": "^9.3.0",
-    "hapijs-starter": "^3.5.0",
-    "path": "^0.12.7"
+    "@types/winston": "^2.3.9",
+    "axios": "^0.18.0",
+    "winston": "^2.4.2",
+    "winston-daily-rotate-file": "^3.1.3"
   },
   "devDependencies": {
     "ts-node": "^4.1.0",

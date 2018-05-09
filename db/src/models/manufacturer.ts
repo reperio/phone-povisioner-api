@@ -1,12 +1,8 @@
 import {BaseModel} from 'reperio-db-starter';
-import {Relation} from 'objection';
-import {Family} from './family';
 
 export class Manufacturer extends BaseModel {
     id: string;
     name: string;
-    config: string;
-    default_config: string;
     component_name: string;
 
     static get tableName() {
