@@ -67,8 +67,7 @@ typings/
 .DS_Store
 
 # Build folders
-server/dist
+*/dist
 db/lib
-client/dist
 package/
 phone-provisioner-api.tar.gz
