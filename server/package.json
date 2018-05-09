@@ -6,7 +6,7 @@
   "typings": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "start": "node ./dist/index.js",
+    "start": "NODE_ENV=development node ./dist/index.js",
     "test": "./node_modules/.bin/mocha --compilers ts:ts-node/register ./test/*.spec.ts"
   },
   "author": "Seven Hills Technology",

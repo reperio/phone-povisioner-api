@@ -1,6 +1,5 @@
 import * as Knex from 'knex';
 import {Model} from 'objection';
-import * as path from "path";
 import {BaseModel} from 'reperio-db-starter';
 
 const KnexConfig = require('../knexfile');
