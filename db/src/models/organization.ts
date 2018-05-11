@@ -2,7 +2,7 @@ import {BaseModel} from 'reperio-db-starter';
 
 export class Organization extends BaseModel {
     id: string;
-    is_global_organization: boolean;
+    type: string;
     enabled: boolean;
     name: string;
 

@@ -28,15 +28,15 @@ export class OrganizationRepository {
             //TODO: could this be made into a subquery?
             const defaultConfigs = await Config
                 .query(this.uow.transaction)
-                .where('o.is_global_organization', true)
+                .where('o.type', 'global')
                 .join('organizations as o', 'o.id', 'configs.organization');
 
             //ON CONFLICT is not supported in Objection, so we have to use raw queries
             //Add organization row
             await this.uow.transaction.raw(`
                 insert into "organizations"
-                    ("enabled", "id", "is_global_organization", "name")
-                    values (true, ?, false, ?)
+                    ("enabled", "id", "type", "name")
+                    values (true, ?, 'normal', ?)
                 on conflict ("id") do update
                     set "name" = ?, enabled = true where "organizations"."id" = ?
                 returning "id"
@@ -72,7 +72,7 @@ export class OrganizationRepository {
                 .query(this.uow.transaction)
                 .update({enabled: false})
                 .whereIn('id', ids)
-                .andWhere('is_global_organization', false);
+                .andWhere('type', 'normal');
             return organizations;
         } catch (err) {
             this.uow.logger.error('Failed to disable organizations');

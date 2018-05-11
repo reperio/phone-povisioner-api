@@ -22,7 +22,7 @@ export class ConfigurationRepository {
                         .andOn(raw('c.organization = ?', organization));
                 }).innerJoin('configs as default_conf', function() {
                     this.on('manufacturers.id', 'default_conf.manufacturer')
-                        .andOn(raw('(SELECT is_global_organization from organizations where id = default_conf.organization) = TRUE'));
+                        .andOn(raw("(SELECT type from organizations where id = default_conf.organization) = 'global'"));
                 }).orderBy('name', 'ASC');
             return manufacturers;
         } catch (err) {
@@ -44,7 +44,7 @@ export class ConfigurationRepository {
                         .andOn(raw('c.organization = ?', organization));
                 }).innerJoin('configs as default_conf', function() {
                     this.on('families.id', 'default_conf.family')
-                        .andOn(raw('(SELECT is_global_organization from organizations where id = default_conf.organization) = TRUE'));
+                        .andOn(raw("(SELECT type from organizations where id = default_conf.organization) = 'global'"));
                 }).orderBy('name', 'ASC');
             return families;
         } catch (err) {
@@ -66,7 +66,7 @@ export class ConfigurationRepository {
                         .andOn(raw('c.organization = ?', organization));
                 }).innerJoin('configs as default_conf', function() {
                     this.on('models.id', 'default_conf.model')
-                        .andOn(raw('(SELECT is_global_organization from organizations where id = default_conf.organization) = TRUE'));
+                        .andOn(raw("(SELECT type from organizations where id = default_conf.organization) = 'global'"));
                 }).orderBy('name', 'ASC');
             return models;
         } catch (err) {
