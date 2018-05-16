@@ -2,12 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const db_1 = require("../../db");
 const hapijs_starter_1 = require("hapijs-starter");
-const provisioningRoutes_1 = require("./api/provisioningRoutes");
 const config_1 = require("./config");
 async function startServer() {
     try {
         const server = new hapijs_starter_1.Server({ authEnabled: false, port: config_1.Config.port });
-        await server.registerAdditionalRoutes(provisioningRoutes_1.default);
         await server.registerExtension({
             type: 'onRequest',
             method: async (request, h) => {
@@ -21,6 +19,7 @@ async function startServer() {
             }
         });
         await server.startServer();
+        await server.registerRoutesFromDirectory('./api');
     }
     catch (e) {
         console.log(e);

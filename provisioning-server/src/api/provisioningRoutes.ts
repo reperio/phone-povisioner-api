@@ -36,6 +36,16 @@ const routes : Array<any> = [
     },
     {
         method: 'GET',
+        path: '/000000000000.cfg',
+        handler: async (request: Request, h: any) => {
+            return readFileSync(`./static/000000000000.cfg`);
+        },
+        config: {
+            auth: false
+        }
+    },
+    {
+        method: 'GET',
         path: '/phone1.cfg',
         handler: async (request: Request, h: any) => {
             const template = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>

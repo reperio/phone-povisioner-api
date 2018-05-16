@@ -68,6 +68,6 @@ typings/
 
 # Build folders
 */dist
-db/lib
+*/lib
 package/
 phone-provisioner-api.tar.gz
