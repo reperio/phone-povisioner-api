@@ -24,7 +24,7 @@ async function startServer() : Promise<void> {
         });
 
         await server.startServer();
-        await server.registerRoutesFromDirectory('./api');
+        await server.registerRoutesFromDirectory(path.resolve(__dirname, './api'));
     } catch(e) {
         console.log(e);
     }

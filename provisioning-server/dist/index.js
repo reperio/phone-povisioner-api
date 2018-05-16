@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const db_1 = require("../../db");
 const hapijs_starter_1 = require("hapijs-starter");
+const path = require("path");
 const config_1 = require("./config");
 async function startServer() {
     try {
@@ -19,7 +20,7 @@ async function startServer() {
             }
         });
         await server.startServer();
-        await server.registerRoutesFromDirectory('./api');
+        await server.registerRoutesFromDirectory(path.resolve(__dirname, './api'));
     }
     catch (e) {
         console.log(e);
