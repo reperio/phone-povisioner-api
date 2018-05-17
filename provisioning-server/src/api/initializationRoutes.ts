@@ -1,11 +1,11 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const fs_1 = require("fs");
-const routes = [
+import {Request} from 'hapi';
+import {readFileSync} from 'fs';
+
+const routes : any[] = [
     {
         method: 'GET',
         path: '/00000000.cfg',
-        handler: async (request, h) => {
+        handler: async (request: Request, h: any) => {
             const template = `<?xml version="1.0" standalone="yes"?>
             <!-- Default Master SIP Configuration File-->
             <!-- For information on configuring Polycom VoIP phones please refer to the -->
@@ -27,6 +27,7 @@ const routes = [
                <APPLICATION_SSIP4000 APP_FILE_PATH_SSIP4000="sip_318.ld" CONFIG_FILES_SSIP4000="phone1.cfg"/>
                <APPLICATION_SSIP6000 APP_FILE_PATH_SSIP6000="3111-15600-001.sip.ld" CONFIG_FILES_SSIP6000="phone1.cfg"/>
             </APPLICATION> `;
+
             return h.response(template).header('Content-Type', 'text/xml');
         },
         config: {
@@ -35,8 +36,18 @@ const routes = [
     },
     {
         method: 'GET',
+        path: '/000000000000.cfg',
+        handler: async (request: Request, h: any) => {
+            return readFileSync(`./static/000000000000.cfg`);
+        },
+        config: {
+            auth: false
+        }
+    },
+    {
+        method: 'GET',
         path: '/phone1.cfg',
-        handler: async (request, h) => {
+        handler: async (request: Request, h: any) => {
             const template = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
             <PHONE_CONFIG>
                     <ALL
@@ -87,6 +98,7 @@ const routes = [
                     />
             </PHONE_CONFIG>
             `;
+
             return h.response(template).header('Content-Type', 'text/xml');
         },
         config: {
@@ -96,8 +108,8 @@ const routes = [
     {
         method: 'GET',
         path: '/{model}.sip.ld',
-        handler: async (request, h) => {
-            return fs_1.readFileSync(`./static/${request.params.model}.sip.ld`);
+        handler: async (request: Request, h: any) => {
+            return readFileSync(`./static/${request.params.model}.sip.ld`);
         },
         config: {
             auth: false
@@ -106,13 +118,13 @@ const routes = [
     {
         method: 'GET',
         path: '/{model}.bootrom.ld',
-        handler: async (request, h) => {
-            return fs_1.readFileSync(`./static/${request.params.model}.bootrom.ld`); //Add actual file
+        handler: async (request: Request, h: any) => {
+            return readFileSync(`./static/${request.params.model}.bootrom.ld`); //Add actual file
         },
         config: {
             auth: false
         }
     }
 ];
-exports.default = routes;
-//# sourceMappingURL=provisioningRoutes.js.map
+
+export default routes;

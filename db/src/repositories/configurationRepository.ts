@@ -120,4 +120,42 @@ export class ConfigurationRepository {
             throw err;
         }
     }
+
+    async composeConfig(model: string, organization: string) {
+        const raw = this.uow.knex.raw;
+        try {
+            const query: any = await PhoneModel
+                .query(this.uow.transaction)
+                .select(
+                    'model_conf.properties as model_config',
+                    'family_conf.properties as family_config',
+                    'manufacturer_conf.properties as manufacturer_config'
+                ).where('models.id', model)
+                .innerJoin('configs as model_conf', function() {
+                    this.on('models.id', 'model_conf.model')
+                        .andOn(raw('model_conf.organization = ?', organization));
+                }).innerJoin('families', function() {
+                    this.on('models.family', 'families.id');
+                }).innerJoin('configs as family_conf', function() {
+                    this.on('families.id', 'family_conf.family')
+                        .andOn(raw('family_conf.organization = ?', organization));
+                }).innerJoin('manufacturers', function() {
+                    this.on('families.manufacturer', 'manufacturers.id');
+                }).innerJoin('configs as manufacturer_conf', function() {
+                    this.on('manufacturers.id', 'manufacturer_conf.manufacturer')
+                        .andOn(raw('manufacturer_conf.organization = ?', organization));
+                });
+
+            return Object.assign(
+                {},
+                JSON.parse(query[0].manufacturer_config),
+                JSON.parse(query[0].family_config),
+                JSON.parse(query[0].model_config)
+            );
+        } catch (err) {
+            this.uow.logger.error('Failed to fetch composed config');
+            this.uow.logger.error(err);
+            throw err;
+        }
+    }
 }
