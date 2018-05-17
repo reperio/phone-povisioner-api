@@ -1,16 +1,32 @@
 import {Request} from "hapi";
 import {polycomConverter} from "../converters";
+import getModelIDFromPath from '../utils/getModelIDFromPath';
 
 const routes: any[] = [
     {
         method: 'GET',
-        path: '/polycom/soundpointip/330.cfg',
+        path: '/{manufacturer}/{family}/{model}.cfg',
         handler: async (request: Request, h: any) => {
-            const template = polycomConverter({
-                digitMap: '*97|*0xxxx|911|9911|0T|011xxx.T|[0-1][2-9]xxxxxxxxx|[2-9]xxxxxxxxx|[2-9]xxxT|**x.T'
-            });
+            const uow = await request.app.getNewUoW();
+            const logger = request.server.app.logger;
 
-            return h.response(template).header('Content-Type', 'text/xml');
+            logger.debug(`Fetching config. Raw params:\n${JSON.stringify(request.params)}`);
+
+            try {
+                const model = getModelIDFromPath(request.params);
+                if(model === null) {
+                    return h.response().code(404);
+                }
+
+                const config = await uow.configurationRepository.composeConfig(model, '1');
+                logger.debug(`Composed config: ${JSON.stringify(config)}`);
+
+                const template = polycomConverter(config);
+
+                return h.response(template).header('Content-Type', 'text/xml');
+            } catch(e) {
+                return h.response().code(500);
+            }
         },
         config: {
             auth: false
