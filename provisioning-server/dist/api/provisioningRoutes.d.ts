@@ -1,2 +1,2 @@
-declare const routes: Array<any>;
+declare const routes: any[];
 export default routes;
