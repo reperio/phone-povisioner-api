@@ -1,5 +1,5 @@
 import {Request} from "hapi";
-import {polycomConverter} from "../converters";
+import {soundpointIPConverter} from "../converters";
 import getModelIDFromPath from '../utils/getModelIDFromPath';
 
 const routes: any[] = [
@@ -21,7 +21,7 @@ const routes: any[] = [
                 const config = await uow.configurationRepository.composeConfig(model, '1');
                 logger.debug(`Composed config: ${JSON.stringify(config)}`);
 
-                const template = polycomConverter(config);
+                const template = soundpointIPConverter(config);
 
                 return h.response(template).header('Content-Type', 'text/xml');
             } catch(e) {
