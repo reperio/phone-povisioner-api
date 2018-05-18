@@ -70,7 +70,7 @@ export class ConfigurationRepository {
                 }).orderBy('name', 'ASC');
             return models;
         } catch (err) {
-            this.uow.logger.error('Failed to fetch families from database');
+            this.uow.logger.error('Failed to fetch models from database');
             this.uow.logger.error(err);
             throw err;
         }
