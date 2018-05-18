@@ -71,3 +71,6 @@ typings/
 */lib
 package/
 phone-provisioner-api.tar.gz
+
+#Firmware
+provisioning-server/static/firmware
