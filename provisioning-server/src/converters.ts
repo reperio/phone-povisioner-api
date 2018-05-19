@@ -1,18 +1,29 @@
 import * as builder from 'xmlbuilder';
 import PropertyBuilder from './utils/propertyBuilder';
 
-export function polycomConverter(config: any) : string {
+export function soundpointIPConverter(config: any) : string {
     let xml = builder.create({
-        PHONE_CONFIG: {
-            ALL: new PropertyBuilder()
-                .tryAddProperty('@dialplan.digitmap', config.digitMap)
+        polycomConfig: {
+            '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+            '@xsi:noNamespaceSchemaLocation': 'polycomConfig.xsd',
+            device: new PropertyBuilder()
                 .tryAddBoolean('@device.prov.tagSerialNo', config.tagSerialNo)
-                .tryAddBoolean('@up.oneTouchVoiceMail', config.oneTouchVoiceMail)
                 .tryAddBoolean('@device.prov.ztpEnabled', config.ztpEnabled)
+                .val(),
+            tcpIpApp: new PropertyBuilder()
+                .tryAddProperty('@tcpIpApp.sntp.address', config.sntpAddress)
+                .tryAddProperty('@tcpIpApp.sntp.gmtOffset', config.sntpGmtOffset)
+                .tryAddProperty('@tcpIpApp.sntp.resyncPeriod', config.sntpResyncPeriod)
+                .val(),
+            dialplan: new PropertyBuilder()
+                .tryAddProperty('@dialplan.digitmap', config.digitMap)
+                .val(),
+            feature: new PropertyBuilder()
                 .tryAddBoolean('@feature.presence.enabled', config.presence)
                 .tryAddBoolean('@feature.messaging.enabled', config.messaging)
-                .tryAddBoolean('@call.callWaiting.enable', config.callWaiting)
                 .tryAddBoolean('@feature.urlDialing.enabled', config.urlDialing)
+                .val(),
+            voice: new PropertyBuilder()
                 .tryAddRank('@voice.codecPref.G711_A', config.codecPref, 'G711_A')
                 .tryAddRank('@voice.codecPref.G711_Mu', config.codecPref, 'G711_Mu')
                 .tryAddRank('@voice.codecPref.G722', config.codecPref, 'G722')
@@ -21,6 +32,14 @@ export function polycomConverter(config: any) : string {
                 .tryAddRank('@voice.codecPref.G729_AB', config.codecPref, 'G729_AB')
                 .tryAddRank('@voice.codecPref.Siren14.48kbps', config.codecPref, 'Siren14.48kbps')
                 .tryAddRank('@voice.codecPref.Siren22.64kbps', config.codecPref, 'Siren22.64kbps')
+                .tryAddBoolean('@voice.vadEnable', config.vadEnable)
+                .tryAddBoolean('@voice.vad.signalAnnexB', config.vadSignalAnnexB)
+                .tryAddProperty('@voice.vadThresh', config.vadThresh)
+                .tryAddBoolean('@voice.volume.persist.handset', config.volumePersistHandset)
+                .tryAddBoolean('@voice.volume.persist.headset', config.volumePersistHeadset)
+                .tryAddBoolean('@voice.volume.persist.handsfree', config.volumePersistHandsFree)
+                .val(),
+            msg: new PropertyBuilder()
                 .tryAddProperty('@msg.mwi.1.callBackMode', config.mwi1_callBackMode)
                 .tryAddProperty('@msg.mwi.1.callBack', config.mwi1_callBack)
                 .tryAddProperty('@msg.mwi.2.callBackMode', config.mwi2_callBackMode)
@@ -33,22 +52,21 @@ export function polycomConverter(config: any) : string {
                 .tryAddProperty('@msg.mwi.5.callBack', config.mwi5_callBack)
                 .tryAddProperty('@msg.mwi.6.callBackMode', config.mwi6_callBackMode)
                 .tryAddProperty('@msg.mwi.6.callBack', config.mwi6_callBack)
+                .tryAddBoolean('@msg.bypassInstantMessage', config.bypassInstantMessage)
+                .val(),
+            up: new PropertyBuilder()
+                .tryAddBoolean('@up.oneTouchVoiceMail', config.oneTouchVoiceMail)
+                .val(),
+            call: new PropertyBuilder()
+                .tryAddBoolean('@call.callWaiting.enable', config.callWaiting)
+                .tryAddBoolean('@call.urlModeDialing', config.urlModeDialing)
+                .val(),
+            prov: new PropertyBuilder()
                 .tryAddBoolean('@prov.polling.enabled', config.pollingEnabled)
                 .tryAddProperty('@prov.polling.mode', config.pollingMode)
                 .tryAddProperty('@prov.polling.period', config.pollingPeriod)
                 .tryAddProperty('@prov.polling.time', config.pollingTime)
                 .tryAddProperty('@prov.polling.timeRandomEnd', config.pollingTimeRandomEnd)
-                .tryAddProperty('@tcpIpApp.sntp.address', config.sntpAddress)
-                .tryAddProperty('@tcpIpApp.sntp.gmtOffset', config.sntpGmtOffset)
-                .tryAddProperty('@tcpIpApp.sntp.resyncPeriod', config.sntpResyncPeriod)
-                .tryAddBoolean('@voice.vadEnable', config.vadEnable)
-                .tryAddBoolean('@voice.vad.signalAnnexB', config.vadSignalAnnexB)
-                .tryAddProperty('@voice.vadThresh', config.vadThresh)
-                .tryAddBoolean('@voice.volume.persist.handset', config.volumePersistHandset)
-                .tryAddBoolean('@voice.volume.persist.headset', config.volumePersistHeadset)
-                .tryAddBoolean('@voice.volume.persist.handsfree', config.volumePersistHandsFree)
-                .tryAddBoolean('@msg.bypassInstantMessage', config.bypassInstantMessage)
-                .tryAddBoolean('@call.urlModeDialing', config.urlModeDialing)
                 .val()
         }
     }, {version: '1.0', encoding: 'UTF-8', standalone: true});
