@@ -1,13 +1,13 @@
 import {ObjectSchema, SchemaMap, object, string, bool, array, number} from 'joi';
-import {possibleCodecPrefValues, possibleCallBackModeValues} from "../../../../phone-provisioner-ui/src/constants/possibleListValues";
+import {possibleCodecPrefValues, possibleCallBackModeValues} from "./possibleListValues";
 
 const timeRegex = /^\d?\d:\d\d$/;
 
-const polycomConfig: SchemaMap = {
+export const polycomConfig: SchemaMap = {
     firmwareVersion: string()
 };
 
-const soundpointIPConfig: SchemaMap = {
+export const soundpointIPConfig: SchemaMap = {
     digitMap: string(),
     tagSerialNo: bool(),
     oneTouchVoiceMail: bool(),
@@ -45,26 +45,22 @@ const soundpointIPConfig: SchemaMap = {
     volumePersistHandsFree: bool()
 }
 
-const soundpointIP330Config: SchemaMap = {
+export const soundpointIP330Config: SchemaMap = {
 
 }
 
-const soundpointIP331Config: SchemaMap = {
+export const soundpointIP331Config: SchemaMap = {
     urlModeDialing: bool()
 }
 
-const soundpointIP335Config: SchemaMap = {
+export const soundpointIP335Config: SchemaMap = {
     urlModeDialing: bool()
 }
 
-const soundpointIP670Config: SchemaMap = {
+export const soundpointIP670Config: SchemaMap = {
     bypassInstantMessage: bool()
 }
 
-const soundpointIP6000Config: SchemaMap = {
+export const soundpointIP6000Config: SchemaMap = {
     bypassInstantMessage: bool()
 }
-
-//const polycomConfig: ObjectSchema = object().keys({});
-
-//export default polycomConfig;

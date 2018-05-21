@@ -1,4 +1,12 @@
 import {Request} from 'hapi';
+import {SchemaMap, object, validate} from 'joi';
+import * as polycomConfigs from '../schema/polycomConfigs';
+
+const allSchemas: {[schema: string]: SchemaMap; } = Object.assign(
+    {},
+    polycomConfigs
+    //Add more schema modules here
+);
 
 const routes = [
     {
@@ -83,6 +91,14 @@ const routes = [
             logger.debug(`Running /config/update-manufacturer-config. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
+                const info = await uow.configurationRepository.getManufacturerInfo(request.payload.id, request.params.organization);
+                logger.debug(info);
+                const schema = object().keys(allSchemas[info.manufacturer_name]);
+                if(validate(request.payload.config, schema).error) {
+                    logger.error(`Failed to update manufacturer ${request.payload.id} due to invalid config syntax`);
+                    return h.response().code(400);
+                }
+
                 const newObj = await uow.configurationRepository.setManufacturerConfig(request.payload.id, request.payload.config, request.params.organization);
                 if(newObj === 0) {
                     return h.response().code(404);
@@ -107,6 +123,15 @@ const routes = [
             logger.debug(`Running /config/update-family-config. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
+                const info = await uow.configurationRepository.getFamilyInfo(request.payload.id, request.params.organization);
+                const schema = object().keys(
+                    Object.assign({}, allSchemas[info.manufacturer_name], allSchemas[info.family_name])
+                );
+                if(validate(request.payload.config, schema).error) {
+                    logger.error(`Failed to update family ${request.payload.id} due to invalid config syntax`);
+                    return h.response().code(400);
+                }
+
                 const newObj = await uow.configurationRepository.setFamilyConfig(request.payload.id, request.payload.config, request.params.organization);
                 if(newObj === 0) {
                     return h.response().code(404);
@@ -131,6 +156,15 @@ const routes = [
             logger.debug(`Running /config/update-model-config. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
+                const info = await uow.configurationRepository.getModelInfo(request.payload.id, request.params.organization);
+                const schema = object().keys(
+                    Object.assign({}, allSchemas[info.manufacturer_name], allSchemas[info.family_name], allSchemas[info.model_name])
+                );
+                if(validate(request.payload.config, schema).error) {
+                    logger.error(`Failed to update model ${request.payload.id} due to invalid config syntax`);
+                    return h.response().code(400);
+                }
+
                 const newObj = await uow.configurationRepository.setModelConfig(request.payload.id, request.payload.config, request.params.organization);
                 if(newObj === 0) {
                     return h.response().code(404);

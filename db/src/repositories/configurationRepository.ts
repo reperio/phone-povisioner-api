@@ -76,7 +76,58 @@ export class ConfigurationRepository {
         }
     }
 
-    async setManufacturerConfig(manufacturer: string, config: any, organization: string) {
+    async getManufacturerInfo(manufacturer: string, organization: string) {
+        try {
+            const info = await Manufacturer
+                .query(this.uow.transaction)
+                .select('component_name as manufacturer_name')
+                .where('id', manufacturer);
+            return info[0];
+        } catch (err) {
+            this.uow.logger.error('Failed to fetch manufacturer info from database');
+            this.uow.logger.error(err);
+            throw err;
+        }
+    }
+
+    async getFamilyInfo(family: string, organization: string) {
+        try {
+            const info = await Family
+                .query(this.uow.transaction)
+                .select('families.component_name as family_name', 'manufacturers.component_name as manufacturer_name')
+                .where('id', family)
+                .innerJoin('manufacturers', function() {
+                    this.on('families.manufacturer', 'manufacturers.id');
+                });
+            return info[0];
+        } catch (err) {
+            this.uow.logger.error('Failed to fetch family info from database');
+            this.uow.logger.error(err);
+            throw err;
+        }
+    }
+
+    async getModelInfo(model: string, organization: string) {
+        try {
+            const info = await Family
+                .query(this.uow.transaction)
+                .select('models.component_name as model_name', 'families.component_name as family_name', 'manufacturers.component_name as manufacturer_name')
+                .where('id', model)
+                .innerJoin('families', function() {
+                    this.on('models.family', 'families.id');
+                })
+                .innerJoin('manufacturers', function() {
+                    this.on('families.manufacturer', 'manufacturers.id');
+                });
+            return info[0];
+        } catch (err) {
+            this.uow.logger.error('Failed to fetch model info from database');
+            this.uow.logger.error(err);
+            throw err;
+        }
+    }
+
+    async setManufacturerConfig(manufacturer: string, config: string, organization: string) {
         try {
             const updatedObj = await Config
                 .query(this.uow.transaction)
@@ -91,7 +142,7 @@ export class ConfigurationRepository {
         }
     }
 
-    async setFamilyConfig(family: string, config: any, organization: string) {
+    async setFamilyConfig(family: string, config: string, organization: string) {
         try {
             const updatedObj = await Config
                 .query(this.uow.transaction)
@@ -106,7 +157,7 @@ export class ConfigurationRepository {
         }
     }
 
-    async setModelConfig(model: string, config: any, organization: string) {
+    async setModelConfig(model: string, config: string, organization: string) {
         try {
             const updatedObj = await Config
                 .query(this.uow.transaction)
