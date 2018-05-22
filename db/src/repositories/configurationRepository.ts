@@ -95,7 +95,7 @@ export class ConfigurationRepository {
             const info = await Family
                 .query(this.uow.transaction)
                 .select('families.component_name as family_name', 'manufacturers.component_name as manufacturer_name')
-                .where('id', family)
+                .where('families.id', family)
                 .innerJoin('manufacturers', function() {
                     this.on('families.manufacturer', 'manufacturers.id');
                 });
@@ -112,7 +112,7 @@ export class ConfigurationRepository {
             const info = await Family
                 .query(this.uow.transaction)
                 .select('models.component_name as model_name', 'families.component_name as family_name', 'manufacturers.component_name as manufacturer_name')
-                .where('id', model)
+                .where('models.id', model)
                 .innerJoin('families', function() {
                     this.on('models.family', 'families.id');
                 })

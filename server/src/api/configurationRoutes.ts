@@ -94,8 +94,10 @@ const routes = [
                 const info = await uow.configurationRepository.getManufacturerInfo(request.payload.id, request.params.organization);
                 logger.debug(info);
                 const schema = object().keys(allSchemas[info.manufacturer_name]);
-                if(validate(request.payload.config, schema).error) {
+                const validation = validate(request.payload.config, schema);
+                if(validation.error) {
                     logger.error(`Failed to update manufacturer ${request.payload.id} due to invalid config syntax`);
+                    logger.error(validation.error);
                     return h.response().code(400);
                 }
 
@@ -127,8 +129,10 @@ const routes = [
                 const schema = object().keys(
                     Object.assign({}, allSchemas[info.manufacturer_name], allSchemas[info.family_name])
                 );
-                if(validate(request.payload.config, schema).error) {
+                const validation = validate(request.payload.config, schema);
+                if(validation.error) {
                     logger.error(`Failed to update family ${request.payload.id} due to invalid config syntax`);
+                    logger.error(validation.error);
                     return h.response().code(400);
                 }
 
@@ -160,8 +164,10 @@ const routes = [
                 const schema = object().keys(
                     Object.assign({}, allSchemas[info.manufacturer_name], allSchemas[info.family_name], allSchemas[info.model_name])
                 );
-                if(validate(request.payload.config, schema).error) {
+                const validation = validate(request.payload.config, schema);
+                if(validation.error) {
                     logger.error(`Failed to update model ${request.payload.id} due to invalid config syntax`);
+                    logger.error(validation.error);
                     return h.response().code(400);
                 }
 
