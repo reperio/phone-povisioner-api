@@ -20,7 +20,7 @@ const routes : any[] = [
         method: 'GET',
         path: '/{model}.bootrom.ld',
         handler: async (request: Request, h: any) => {
-            return readFileSync(`./static/${request.params.model}.bootrom.ld`); //Add actual file
+            return readFileSync(`./static/bootrom/${request.params.model}.bootrom.ld`); //Add actual file
         },
         config: {
             auth: false
