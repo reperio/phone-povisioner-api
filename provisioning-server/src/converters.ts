@@ -7,6 +7,9 @@ export function soundpointIPConverter(config: any) : string {
             '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
             '@xsi:noNamespaceSchemaLocation': 'polycomConfig.xsd',
             device: new PropertyBuilder()
+                .tryAddBoolean('@device.prov.serverType.set', true)
+                .tryAddProperty('@device.prov.serverType', process.env.SERVER_TYPE)
+                .tryAddProperty('@device.prov.serverName', process.env.SERVER_NAME)
                 .tryAddBoolean('@device.prov.tagSerialNo', config.tagSerialNo)
                 .tryAddBoolean('@device.prov.ztpEnabled', config.ztpEnabled)
                 .val(),
