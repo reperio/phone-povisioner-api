@@ -1,6 +1,6 @@
 import {Request} from "hapi";
-import {soundpointIPConverter} from "../../../config-conversion/converters";
-import getModelIDFromPath from '../../../config-conversion/getModelIDFromPath';
+import {soundpointIPConverter} from "../../../config-conversion/src/converters";
+import getModelIDFromPath from '../../../config-conversion/src/getModelIDFromPath';
 
 const routes: any[] = [
     {
