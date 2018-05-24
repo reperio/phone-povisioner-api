@@ -1,4 +1,4 @@
-export default class PropertyBuilder {
+export class PropertyBuilder {
     private obj: any;
 
     constructor() {

@@ -1,5 +1,5 @@
 import * as builder from 'xmlbuilder';
-import PropertyBuilder from './propertyBuilder';
+import {PropertyBuilder} from './propertyBuilder';
 
 export function soundpointIPConverter(config: any) : string {
     let xml = builder.create({

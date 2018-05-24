@@ -10,7 +10,7 @@ const modelIDs: any = {
     }
 }
 
-export default function getModelIDFromPath(params: any) {
+export function getModelIDFromPath(params: any) {
     const manufacturer = modelIDs[params.manufacturer];
     if(manufacturer === undefined) {
         return null;

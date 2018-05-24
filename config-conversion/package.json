@@ -2,8 +2,11 @@
   "name": "config-conversion",
   "version": "1.0.0",
   "description": "Library to convert our config JSON to the proper configuration XML format",
-  "main": "./src/converters.ts",
+  "main": "./lib/index.js",
+  "typings": "./lib/index.d.ts",
   "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Seven Hills Technology",
   "license": "ISC",
