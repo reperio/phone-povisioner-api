@@ -16,6 +16,8 @@ const routes : any[] = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
+            logger.debug('Fetching 000000000000.cfg')
+
             let xml = builder.create({
                 APPLICATION: {
                     '@APP_FILE_PATH': 'sip.ld',

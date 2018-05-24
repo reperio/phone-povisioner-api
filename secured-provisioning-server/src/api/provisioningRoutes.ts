@@ -4,12 +4,13 @@ import {soundpointIPConverter, getModelIDFromPath} from "../../../config-convers
 const routes: any[] = [
     {
         method: 'GET',
-        path: '/{manufacturer}/{family}/{model}.cfg',
+        path: '/{address}.cfg',
         handler: async (request: Request, h: any) => {
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
             logger.debug(`Fetching config. Raw params:\n${JSON.stringify(request.params)}`);
+            logger.debug(request.payload);
 
             try {
                 const model = getModelIDFromPath(request.params);
