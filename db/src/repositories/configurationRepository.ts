@@ -172,7 +172,7 @@ export class ConfigurationRepository {
         }
     }
 
-    async composeConfig(model: string, organization: string) {
+    async composeBaseConfig(model: string, organization: string = '1') {
         const raw = this.uow.knex.raw;
         try {
             const query: any = await PhoneModel
@@ -201,6 +201,59 @@ export class ConfigurationRepository {
                 {},
                 JSON.parse(query[0].manufacturer_config),
                 JSON.parse(query[0].family_config),
+                JSON.parse(query[0].model_config)
+            );
+        } catch (err) {
+            this.uow.logger.error('Failed to fetch composed config');
+            this.uow.logger.error(err);
+            throw err;
+        }
+    }
+
+    async composeConfig(model: string, organization: string) {
+        const raw = this.uow.knex.raw;
+        try {
+            const query: any = await PhoneModel
+                .query(this.uow.transaction)
+                .select(
+                    'model_conf.properties as model_config',
+                    'family_conf.properties as family_config',
+                    'manufacturer_conf.properties as manufacturer_config',
+                    'global_model_conf.properties as global_model_config',
+                    'global_family_conf.properties as global_family_config',
+                    'global_manufacturer_conf.properties as global_manufacturer_config'
+                ).where('models.id', model)
+                .innerJoin('configs as model_conf', function() {
+                    this.on('models.id', 'model_conf.model')
+                        .andOn(raw('model_conf.organization = ?', organization));
+                }).innerJoin('configs as global_model_conf', function() {
+                    this.on('models.id', 'global_model_conf.model')
+                        .andOn(raw("(SELECT type from organizations where id = global_model_conf.organization) = 'global'"));
+                }).innerJoin('families', function() {
+                    this.on('models.family', 'families.id');
+                }).innerJoin('configs as family_conf', function() {
+                    this.on('families.id', 'family_conf.family')
+                        .andOn(raw('family_conf.organization = ?', organization));
+                }).innerJoin('configs as global_family_conf', function() {
+                    this.on('families.id', 'global_family_conf.family')
+                        .andOn(raw("(SELECT type from organizations where id = global_family_conf.organization) = 'global'"));
+                }).innerJoin('manufacturers', function() {
+                    this.on('families.manufacturer', 'manufacturers.id');
+                }).innerJoin('configs as manufacturer_conf', function() {
+                    this.on('manufacturers.id', 'manufacturer_conf.manufacturer')
+                        .andOn(raw('manufacturer_conf.organization = ?', organization));
+                }).innerJoin('configs as global_manufacturer_conf', function() {
+                    this.on('manufacturers.id', 'global_manufacturer_conf.manufacturer')
+                        .andOn(raw("(SELECT type from organizations where id = global_manufacturer_conf.organization) = 'global'"));
+                });
+
+            return Object.assign(
+                {},
+                JSON.parse(query[0].global_manufacturer_config),
+                JSON.parse(query[0].manufacturer_config),
+                JSON.parse(query[0].global_family_config),
+                JSON.parse(query[0].family_config),
+                JSON.parse(query[0].global_model_config),
                 JSON.parse(query[0].model_config)
             );
         } catch (err) {
