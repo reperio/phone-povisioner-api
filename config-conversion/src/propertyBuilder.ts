@@ -1,8 +1,10 @@
 export class PropertyBuilder {
     private obj: any;
+    private addSetParameter: boolean;
 
     constructor() {
         this.obj = {};
+        this.addSetParameter = false;
     }
 
     tryAddProperty(name: string, value: any) : PropertyBuilder {
@@ -26,7 +28,15 @@ export class PropertyBuilder {
         return this;
     }
 
+    tryAddSetParameter() : PropertyBuilder {
+        this.addSetParameter = true;
+        return this;
+    }
+
     val() : any {
+        if(this.addSetParameter && this.obj !== {}) {
+            this.obj.set = '1';
+        }
         return this.obj;
     }
 }
