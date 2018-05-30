@@ -1,3 +1,3 @@
 export * from './converters';
 export * from './getModelIDFromPath';
-export * from './propertyBuilder';
+export * from './XMLPropertyBuilder';
