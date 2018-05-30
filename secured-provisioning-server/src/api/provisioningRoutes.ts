@@ -10,7 +10,7 @@ const routes: any[] = [
             const logger = request.server.app.logger;
 
             logger.debug(`Fetching config. Raw params:\n${JSON.stringify(request.params)}`);
-            logger.debug(request.payload);
+            logger.debug(request.headers);
 
             try {
                 const model = getModelIDFromPath(request.params);
