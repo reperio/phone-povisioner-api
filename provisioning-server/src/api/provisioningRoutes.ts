@@ -17,7 +17,7 @@ const routes: any[] = [
                     return h.response().code(404);
                 }
 
-                const config = await uow.configurationRepository.composeConfig(model, '1');
+                const config = await uow.configurationRepository.composeBaseConfig(model, '1');
                 logger.debug(`Composed config: ${JSON.stringify(config)}`);
 
                 const template = soundpointIPConverter(config);
