@@ -1,5 +1,6 @@
 import {Request} from "hapi";
 import {soundpointIPConverter, getModelIDFromPath} from "../../../config-conversion";
+import {parseUserAgentHeader, UserAgentData} from "../utils/parseUserAgentHeader";
 
 const routes: any[] = [
     {
@@ -10,9 +11,14 @@ const routes: any[] = [
             const logger = request.server.app.logger;
 
             logger.debug(`Fetching config. Raw params:\n${JSON.stringify(request.params)}`);
-            logger.debug(request.headers);
 
             try {
+                const userAgent = parseUserAgentHeader(request.headers['user-agent']);
+                uow.deviceRepository.addDevice(
+                    null, userAgent.model, userAgent.macAddress, userAgent.firmwareVersion, null
+                );
+                logger.debug(`Added device: ${userAgent.macAddress}`);
+
                 const model = getModelIDFromPath(request.params);
                 if(model === null) {
                     return h.response().code(404);

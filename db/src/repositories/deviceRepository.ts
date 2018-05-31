@@ -18,7 +18,8 @@ export class DeviceRepository {
                 model,
                 mac_address,
                 firmware_version,
-                name: 'initial'
-            })
+                name,
+                status: 'initial'
+            }).returning('mac_address');
     }
 }
