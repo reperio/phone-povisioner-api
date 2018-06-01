@@ -13,6 +13,11 @@ exports.up = async knex => {
         t.string('name');
         t.enum('status', ['initial', 'adopted', 'provisioned'])
             .notNullable();
+        t.uuid('id')
+            .unique();
+        t.string('user')
+            .unique();
+        t.string('password');
     });
 };
 

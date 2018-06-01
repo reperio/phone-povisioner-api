@@ -14,6 +14,9 @@ const routes: any[] = [
 
             try {
                 const userAgent = parseUserAgentHeader(request.headers['user-agent']);
+                if(!userAgent.macAddress || !userAgent.firmwareVersion || !userAgent.model || !userAgent.type || !userAgent.transportType) {
+                    return h.response().code(404);
+                }
                 uow.deviceRepository.addDevice(
                     null, userAgent.model, userAgent.macAddress, userAgent.firmwareVersion, null
                 );
