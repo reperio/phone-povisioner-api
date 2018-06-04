@@ -7,6 +7,9 @@ export class Device extends BaseModel {
     firmware_version: string;
     name: string;
     status: string;
+    kazoo_id: string;
+    user: string;
+    password: string;
 
     static get tableName() {
         return 'devices';

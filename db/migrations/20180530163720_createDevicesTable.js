@@ -13,7 +13,7 @@ exports.up = async knex => {
         t.string('name');
         t.enum('status', ['initial', 'adopted', 'provisioned'])
             .notNullable();
-        t.uuid('id')
+        t.uuid('kazoo_id')
             .unique();
         t.string('user')
             .unique();

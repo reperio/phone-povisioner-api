@@ -1,7 +1,7 @@
 import {UnitOfWork} from '../unitOfWork';
-import {PhoneModel} from "../models/phoneModel";
-import {Organization} from "../models/organization";
 import {Device} from "../models/device";
+import {Config} from "../models/config";
+import * as uuid from 'uuid';
 
 export class DeviceRepository {
     uow: UnitOfWork;
@@ -10,16 +10,38 @@ export class DeviceRepository {
         this.uow = uow;
     }
 
-    async addDevice(organization: string, model: string, mac_address: string, firmware_version: string, name: string) {
-        await Device
-            .query(this.uow.transaction)
-            .insert({
-                organization,
-                model,
-                mac_address,
-                firmware_version,
-                name,
-                status: 'initial'
-            }).returning('mac_address');
+    async addDevice(model: string, mac_address: string, firmware_version: string) {
+        try {
+            await Device
+                .query(this.uow.transaction)
+                .insert({
+                    organization: null,
+                    model,
+                    mac_address,
+                    firmware_version,
+                    name: null,
+                    status: 'initial',
+                    kazoo_id: null,
+                    user: uuid.v4(),
+                    password: uuid.v4()
+                }).returning('kazoo_id');
+        } catch (err) {
+            this.uow.logger.error('Failed to add device');
+            this.uow.logger.error(err);
+            throw err;
+        }
+    }
+
+    async updateDevice(mac_address: string, update: Partial<Config>) {
+        try {
+            await Config
+                .query(this.uow.transaction)
+                .update(update)
+                .where('mac_address', mac_address);
+        } catch (err) {
+            this.uow.logger.error('Failed to update device');
+            this.uow.logger.error(err);
+            throw err;
+        }
     }
 }
