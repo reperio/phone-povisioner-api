@@ -22,17 +22,17 @@ const routes: any[] = [
 
                 const device = await uow.deviceRepository.getDevice(userAgent.macAddress);
 
-                const a = request.params.address;
-                const address = `${a[0]}${a[1]}:${a[2]}${a[3]}:${a[4]}${a[5]}:${a[6]}${a[7]}:${a[8]}${a[9]}:${a[10]}${a[11]}`;
-                if(address !== device.user && address !== userAgent.macAddress) {
-                    return h.response().code(404);
-                }
-
                 if(device === null) {
                     await uow.deviceRepository.addDevice(
                         userAgent.model, userAgent.macAddress, userAgent.firmwareVersion
                     );
                     logger.debug(`Added device: ${userAgent.macAddress}`);
+                    return h.response().code(404);
+                }
+
+                const a = request.params.address;
+                const address = `${a[0]}${a[1]}:${a[2]}${a[3]}:${a[4]}${a[5]}:${a[6]}${a[7]}:${a[8]}${a[9]}:${a[10]}${a[11]}`;
+                if(address !== device.user && address !== userAgent.macAddress) {
                     return h.response().code(404);
                 }
 
@@ -44,10 +44,15 @@ const routes: any[] = [
                 const config = await uow.configurationRepository.composeConfig(device.model, device.organization);
                 logger.debug(`Composed config: ${JSON.stringify(config)}`);
 
-                const template = device.status === 'adopted' ?
-                    soundpointIPConverter(config, device.user, device.password) : soundpointIPConverter(config);
+                let template;
+                if (device.status === 'adopted') {
+                    template = soundpointIPConverter(config, device.user, device.password);
+                    await uow.deviceRepository.updateDevice(userAgent.macAddress, {status: 'given_credentials'});
+                } else {
+                    template = soundpointIPConverter(config);
+                }
 
-                //if address === device.user, add other props
+                //if address === device.user, add other props and set status to provisioned
 
                 return h.response(template).header('Content-Type', 'text/xml');
             } catch(e) {
@@ -75,6 +80,7 @@ const routes: any[] = [
 
                 const device = await uow.deviceRepository.getDevice(userAgent.macAddress);
 
+                //Concurrency issues with the other route?
                 if(device === null) {
                     await uow.deviceRepository.addDevice(
                         userAgent.model, userAgent.macAddress, userAgent.firmwareVersion
