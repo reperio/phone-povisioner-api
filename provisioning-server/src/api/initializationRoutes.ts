@@ -1,12 +1,6 @@
 import {Request} from 'hapi';
 import * as builder from 'xmlbuilder';
-
-function firmwareVersion(config: any) {
-    if(config.firmwareVersion === undefined || config.firmwareVersion === '') {
-        return 'sip.ld';
-    }
-    return `${config.firmwareVersion}.sip.ld`
-}
+import {firmwareVersion} from '../../../config-conversion';
 
 const routes : any[] = [
     {

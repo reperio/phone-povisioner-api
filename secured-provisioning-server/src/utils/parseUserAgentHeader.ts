@@ -12,7 +12,8 @@ export function parseUserAgentHeader(userAgent: string) : UserAgentData {
         model,
         firmwareVersion,
         macAddress,
-        type
+        type,
+        applicationTag: modelNameToApplicationTag(model)
     }
 }
 
@@ -22,12 +23,22 @@ export class UserAgentData {
     firmwareVersion: string;
     macAddress: string;
     type: string;
+    applicationTag: string;
 }
 
 function modelNameToID(model: string) {
     switch(model) {
         case 'PolycomSoundPointIP-SPIP_335-UA':
             return '1ceebd84-b735-4a90-ac51-854c7ac01b2c';
+        default:
+            return undefined;
+    }
+}
+
+function modelNameToApplicationTag(model: string) {
+    switch(model) {
+        case 'PolycomSoundPointIP-SPIP_335-UA':
+            return 'SPIP335';
         default:
             return undefined;
     }
