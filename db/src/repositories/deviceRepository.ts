@@ -23,7 +23,8 @@ export class DeviceRepository {
                     status: 'initial',
                     kazoo_id: null,
                     user: uuid.v4(),
-                    password: uuid.v4()
+                    password: uuid.v4(),
+                    activated_temp_url: null
                 }).returning('kazoo_id');
         } catch (err) {
             this.uow.logger.error('Failed to add device');
@@ -32,9 +33,23 @@ export class DeviceRepository {
         }
     }
 
-    async updateDevice(mac_address: string, update: Partial<Config>) {
+    async getDevice(mac_address: string) : Promise<Device> {
         try {
-            await Config
+            const device = await Device
+                .query(this.uow.transaction)
+                .where('mac_adress', mac_address);
+
+            return device.length > 0 ? device[0] : null;
+        } catch (err) {
+            this.uow.logger.error('Failed to fetch device');
+            this.uow.logger.error(err);
+            throw err;
+        }
+    }
+
+    async updateDevice(mac_address: string, update: Partial<Device>) {
+        try {
+            await Device
                 .query(this.uow.transaction)
                 .update(update)
                 .where('mac_address', mac_address);
