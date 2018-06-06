@@ -1,18 +1,22 @@
 import * as builder from 'xmlbuilder';
 import {XMLPropertyBuilder} from './XMLPropertyBuilder';
 
-export function soundpointIPConverter(config: any) : string {
+export function soundpointIPConverter(config: any, user?: string, password?: string) : string {
     let xml = builder.create({
         polycomConfig: new XMLPropertyBuilder()
             .tryAddProperty('@xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
             .tryAddProperty('@xsi:noNamespaceSchemaLocation', 'polycomConfig.xsd')
+            .tryAddProperty('@device.prov.password', password)
             .tryAddProperty('@device.prov.serverType', process.env.SERVER_TYPE)
             .tryAddProperty('@device.prov.serverName', process.env.SERVER_NAME)
             .tryAddBoolean('@device.prov.tagSerialNo', config.tagSerialNo)
+            .tryAddProperty('@device.prov.user', user)
             .tryAddBoolean('@device.prov.ztpEnabled', config.ztpEnabled)
+            .tryAddProperty('@device.prov.password.set', password !== undefined)
             .tryAddBoolean('@device.prov.serverType.set', process.env.SERVER_TYPE !== undefined)
             .tryAddBoolean('@device.prov.serverName.set', process.env.SERVER_NAME !== undefined)
             .tryAddBoolean('@device.prov.tagSerialNo.set', config.tagSerialNo !== undefined)
+            .tryAddProperty('@device.prov.user.set', user !== undefined)
             .tryAddBoolean('@device.prov.ztpEnabled.set', config.ztpEnabled !== undefined)
             .tryAddBoolean('@device.set', true)//
             .tryAddProperty('@tcpIpApp.sntp.address', config.sntpAddress)
