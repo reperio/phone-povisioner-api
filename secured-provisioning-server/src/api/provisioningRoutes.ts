@@ -1,6 +1,6 @@
 import {Request} from "hapi";
 import {soundpointIPConverter, getModelIDFromPath} from "../../../config-conversion";
-import {parseUserAgentHeader, UserAgentData} from "../utils/parseUserAgentHeader";
+import {parseUserAgentHeader} from "../utils/parseUserAgentHeader";
 import * as builder from 'xmlbuilder';
 import {firmwareVersion} from '../../../config-conversion';
 
@@ -15,8 +15,11 @@ const routes: any[] = [
             logger.debug(`Fetching ${request.params.address}.cfg. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
+                logger.debug(`Received user-agent: ${request.headers['user-agent']}`);
                 const userAgent = parseUserAgentHeader(request.headers['user-agent']);
-                if(!userAgent.macAddress || !userAgent.firmwareVersion || !userAgent.model || !userAgent.type || !userAgent.transportType) {
+                if(!userAgent.macAddress || !userAgent.firmwareVersion || !userAgent.model || !userAgent.type || !userAgent.transportType || !userAgent.applicationTag) {
+                    logger.debug('Request failed: invalid user-agent header.');
+                    logger.debug(JSON.stringify((userAgent)));
                     return h.response().code(404);
                 }
 
@@ -30,14 +33,21 @@ const routes: any[] = [
                     return h.response().code(404);
                 }
 
+                if(device.status === 'initial') {
+                    logger.debug(`Request failed: device is not adopted.`);
+                    return h.response().code(404);
+                }
+
                 const a = request.params.address;
                 const address = `${a[0]}${a[1]}:${a[2]}${a[3]}:${a[4]}${a[5]}:${a[6]}${a[7]}:${a[8]}${a[9]}:${a[10]}${a[11]}`;
                 if(address !== device.user && address !== userAgent.macAddress) {
+                    logger.debug(`Request failed: URL doesn't match mac address in user agent.`);
                     return h.response().code(404);
                 }
 
                 if(device.status === 'given_credentials' || device.status === 'provisioned') {
                     //TODO: authenticate
+                    logger.debug(`Request failed: failed authentication.`);
                     return h.response().code(401);
                 }
 
@@ -73,8 +83,10 @@ const routes: any[] = [
             logger.debug(`Fetching 000000000000.cfg. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
+                logger.debug(`Received user-agent: ${request.headers['user-agent']}`);
                 const userAgent = parseUserAgentHeader(request.headers['user-agent']);
-                if(!userAgent.macAddress || !userAgent.firmwareVersion || !userAgent.model || !userAgent.type || !userAgent.transportType) {
+                if(!userAgent.macAddress || !userAgent.firmwareVersion || !userAgent.model || !userAgent.type || !userAgent.transportType || !userAgent.applicationTag) {
+                    logger.debug('Request failed: invalid user-agent header.');
                     return h.response().code(404);
                 }
 
@@ -89,8 +101,14 @@ const routes: any[] = [
                     return h.response().code(404);
                 }
 
+                if(device.status === 'initial') {
+                    logger.debug(`Request failed: device is not adopted.`);
+                    return h.response().code(404);
+                }
+
                 if(device.status === 'given_credentials' || device.status === 'provisioned') {
                     //TODO: authenticate
+                    logger.debug(`Request failed: failed authentication.`);
                     return h.response().code(401);
                 }
 

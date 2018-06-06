@@ -23,8 +23,7 @@ export class DeviceRepository {
                     status: 'initial',
                     kazoo_id: null,
                     user: uuid.v4(),
-                    password: uuid.v4(),
-                    activated_temp_url: null
+                    password: uuid.v4()
                 }).returning('kazoo_id');
         } catch (err) {
             this.uow.logger.error('Failed to add device');
@@ -37,7 +36,7 @@ export class DeviceRepository {
         try {
             const device = await Device
                 .query(this.uow.transaction)
-                .where('mac_adress', mac_address);
+                .where('mac_address', mac_address);
 
             return device.length > 0 ? device[0] : null;
         } catch (err) {

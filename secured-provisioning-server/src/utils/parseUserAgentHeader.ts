@@ -4,6 +4,7 @@ export function parseUserAgentHeader(userAgent: string) : UserAgentData {
     let [transportType, deviceInfo, macAddress, type] = userAgent.split(' ');
     let [model, firmwareVersion] = deviceInfo.split('/');
 
+    const applicationTag = modelNameToApplicationTag(model);
     model = modelNameToID(model);
     macAddress = parseMacAddress(macAddress);
 
@@ -13,7 +14,7 @@ export function parseUserAgentHeader(userAgent: string) : UserAgentData {
         firmwareVersion,
         macAddress,
         type,
-        applicationTag: modelNameToApplicationTag(model)
+        applicationTag
     }
 }
 
@@ -49,6 +50,6 @@ function parseMacAddress(macAddress: string) {
     if(address.length === 0) {
         return undefined;
     }
-    const a = address[0]
+    const a = address[0];
     return `${a[0]}${a[1]}:${a[2]}${a[3]}:${a[4]}${a[5]}:${a[6]}${a[7]}:${a[8]}${a[9]}:${a[10]}${a[11]}`;
 }

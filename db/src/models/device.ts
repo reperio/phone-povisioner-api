@@ -10,7 +10,6 @@ export class Device extends BaseModel {
     kazoo_id: string;
     user: string;
     password: string;
-    activated_temp_url: Date;
 
     static get tableName() {
         return 'devices';
