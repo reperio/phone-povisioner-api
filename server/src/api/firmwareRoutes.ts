@@ -38,8 +38,9 @@ const routes = [
             logger.debug(`Running /firmware/remove-file. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
-                const firmwareFile = path.resolve(firmwareFilePath, request.payload.filename);
-                const bootromFile = path.resolve(bootromFilePath, request.payload.filename);
+                const filename = path.basename(request.payload.filename);
+                const firmwareFile = path.resolve(firmwareFilePath, filename);
+                const bootromFile = path.resolve(bootromFilePath, filename);
 
                 if(fs.existsSync(firmwareFile)) {
                     fs.unlinkSync(firmwareFile);
@@ -57,6 +58,45 @@ const routes = [
         },
         config: {
             auth: false
+        }
+    },
+    {
+        method: 'POST',
+        path: '/firmware/add-files',
+        handler: async (request: Request, h: any) => {
+            const logger = request.server.app.logger;
+
+            logger.debug(`Running /firmware/add-files.`);
+
+            try {
+                //files.length is 0 for some reason
+                for(let i = 0; i < request.payload.files.length; i++) {
+                    const name = request.payload.files[i].hapi.filename;
+                    if(!name.endsWith('.sip.ld') && !name.endsWith('.bootrom.ld')) {
+                        return h.response().code(415);
+                    }
+                }
+                for(let i = 0; i < request.payload.files.length; i++) {
+                    const name = request.payload.files[i].hapi.filename;
+                    const dir = name.endsWith('.sip.ld') ? firmwareFilePath : bootromFilePath;
+                    request.payload.files[i].pipe(fs.createWriteStream(path.resolve(dir, name)));
+                }
+
+                return h.response().code(200);
+            } catch(e) {
+                logger.error(e);
+                return h.response().code(500);
+            }
+        },
+        config: {
+            auth: false,
+            payload: {
+                output: 'stream',
+                parse: true,
+                allow: 'multipart/form-data',
+                maxBytes: 50 * 1000 * 1000
+            }
+
         }
     }
 ];
