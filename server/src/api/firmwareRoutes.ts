@@ -66,20 +66,25 @@ const routes = [
         handler: async (request: Request, h: any) => {
             const logger = request.server.app.logger;
 
-            logger.debug(`Running /firmware/add-files.`);
+            //Don't log the raw contents of the files
+            const readablePayload = Array.isArray(request.payload.files) ?
+                request.payload.files.map((f:any) => Object.assign({}, f, {_data: ['...']})) :
+                Object.assign({}, request.payload.files, {_data: ['...']});
+            logger.debug(`Running /firmware/add-files. Raw payload:\n${JSON.stringify({files: readablePayload})}`);
 
             try {
                 //files.length is 0 for some reason
-                for(let i = 0; i < request.payload.files.length; i++) {
-                    const name = request.payload.files[i].hapi.filename;
+                const files = Array.isArray(request.payload.files) ? request.payload.files : [request.payload.files];
+                for(let i = 0; i < files.length; i++) {
+                    const name = files[i].hapi.filename;
                     if(!name.endsWith('.sip.ld') && !name.endsWith('.bootrom.ld')) {
                         return h.response().code(415);
                     }
                 }
-                for(let i = 0; i < request.payload.files.length; i++) {
-                    const name = request.payload.files[i].hapi.filename;
+                for(let i = 0; i < files.length; i++) {
+                    const name = files[i].hapi.filename;
                     const dir = name.endsWith('.sip.ld') ? firmwareFilePath : bootromFilePath;
-                    request.payload.files[i].pipe(fs.createWriteStream(path.resolve(dir, name)));
+                    files[i].pipe(fs.createWriteStream(path.resolve(dir, name)));
                 }
 
                 return h.response().code(200);
@@ -92,7 +97,6 @@ const routes = [
             auth: false,
             payload: {
                 output: 'stream',
-                parse: true,
                 allow: 'multipart/form-data',
                 maxBytes: 50 * 1000 * 1000
             }
