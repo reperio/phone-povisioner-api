@@ -4,6 +4,13 @@ import * as path from 'path';
 import {Request} from 'hapi';
 import {Config} from './config';
 
+async function validate(request: Request, username: string, password: string) {
+    return {
+        isValid: true,
+        credentials: {username, password}
+    };
+}
+
 async function startServer() : Promise<void> {
     try {
         const server = new Server({authEnabled: false, port: Config.port});
@@ -22,6 +29,9 @@ async function startServer() : Promise<void> {
                 return h.continue;
             }
         });
+
+        await server.registerAdditionalPlugin(require('hapi-auth-basic'));
+        server.strategy('conditionalAuth', 'basic', {validate});
 
         await server.startServer();
         await server.registerRoutesFromDirectory(path.resolve(__dirname, './api'));

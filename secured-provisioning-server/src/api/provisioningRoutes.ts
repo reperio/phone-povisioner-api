@@ -46,9 +46,10 @@ const routes: any[] = [
                 }
 
                 if(device.status === 'given_credentials' || device.status === 'provisioned') {
-                    //TODO: authenticate
-                    logger.debug(`Request failed: failed authentication.`);
-                    return h.response().code(401);
+                    if(!request.auth.isAuthenticated || request.auth.credentials.username !== device.user || request.auth.credentials.password !== device.password) {
+                        logger.debug(`Request failed: failed authentication.`);
+                        return h.response().code(401).header('WWW-Authenticate', 'Basic realm="Restricted Content"');
+                    }
                 }
 
                 const config = await uow.configurationRepository.composeConfig(device.model, device.organization);
@@ -70,7 +71,7 @@ const routes: any[] = [
             }
         },
         config: {
-            auth: false
+            auth: 'conditionalAuth'
         }
     },
     {
@@ -107,9 +108,10 @@ const routes: any[] = [
                 }
 
                 if(device.status === 'given_credentials' || device.status === 'provisioned') {
-                    //TODO: authenticate
-                    logger.debug(`Request failed: failed authentication.`);
-                    return h.response().code(401);
+                    if(!request.auth.isAuthenticated || request.auth.credentials.username !== device.user || request.auth.credentials.password !== device.password) {
+                        logger.debug(`Request failed: failed authentication.`);
+                        return h.response().code(401).header('WWW-Authenticate', 'Basic realm="Restricted Content"');
+                    }
                 }
 
                 let builderObj : any = {
@@ -136,7 +138,7 @@ const routes: any[] = [
             }
         },
         config: {
-            auth: false
+            auth: 'conditionalAuth'
         }
     },
     {
