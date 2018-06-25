@@ -56,9 +56,10 @@ const routes: any[] = [
                 logger.debug(`Composed config: ${JSON.stringify(config)}`);
 
                 let template;
-                if (device.status === 'adopted') {
+                if (device.status === 'adopted' || device.status === 'initial_credentials') {
                     template = soundpointIPConverter(config, device.user, device.password);
-                    await uow.deviceRepository.updateDevice(userAgent.macAddress, {status: 'given_credentials'});
+                    const status = device.status === 'adopted' ? 'initial_credentials' : 'given_credentials';
+                    await uow.deviceRepository.updateDevice(userAgent.macAddress, {status});
                 } else {
                     template = soundpointIPConverter(config);
                 }
