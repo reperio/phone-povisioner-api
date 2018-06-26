@@ -1,7 +1,6 @@
 import {Request} from 'hapi';
 import * as fs from 'fs';
 import * as path from 'path';
-import {object, validate} from "joi";
 
 const firmwareFilePath = path.resolve(__dirname, '../../../provisioning-server/static/firmware');
 const bootromFilePath = path.resolve(__dirname, '../../../provisioning-server/static/bootrom');

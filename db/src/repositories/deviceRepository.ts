@@ -45,6 +45,19 @@ export class DeviceRepository {
         }
     }
 
+    async getDevices() : Promise<Device[]> {
+        try {
+            const devices = await Device
+                .query(this.uow.transaction);
+
+            return devices;
+        } catch (err) {
+            this.uow.logger.error('Failed to fetch devices');
+            this.uow.logger.error(err);
+            throw err;
+        }
+    }
+
     async updateDevice(mac_address: string, update: Partial<Device>) {
         try {
             await Device
