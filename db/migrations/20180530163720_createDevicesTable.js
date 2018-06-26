@@ -11,7 +11,7 @@ exports.up = async knex => {
         t.string('firmware_version')
             .notNullable();
         t.string('name');
-        t.enum('status', ['initial', 'adopted', 'given_credentials', 'provisioned'])
+        t.enum('status', ['initial', 'adopted', 'initial_credentials', 'given_credentials', 'provisioned'])
             .notNullable();
         t.string('kazoo_id')
             .unique();

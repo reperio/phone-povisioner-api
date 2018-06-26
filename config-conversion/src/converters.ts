@@ -12,11 +12,11 @@ export function soundpointIPConverter(config: any, user?: string, password?: str
             .tryAddBoolean('@device.prov.tagSerialNo', config.tagSerialNo)
             .tryAddProperty('@device.prov.user', user)
             .tryAddBoolean('@device.prov.ztpEnabled', config.ztpEnabled)
-            .tryAddProperty('@device.prov.password.set', password !== undefined)
+            .tryAddBoolean('@device.prov.password.set', password !== undefined)
             .tryAddBoolean('@device.prov.serverType.set', process.env.SERVER_TYPE !== undefined)
             .tryAddBoolean('@device.prov.serverName.set', process.env.SERVER_NAME !== undefined)
             .tryAddBoolean('@device.prov.tagSerialNo.set', config.tagSerialNo !== undefined)
-            .tryAddProperty('@device.prov.user.set', user !== undefined)
+            .tryAddBoolean('@device.prov.user.set', user !== undefined)
             .tryAddBoolean('@device.prov.ztpEnabled.set', config.ztpEnabled !== undefined)
             .tryAddBoolean('@device.set', true)//
             .tryAddProperty('@tcpIpApp.sntp.address', config.sntpAddress)

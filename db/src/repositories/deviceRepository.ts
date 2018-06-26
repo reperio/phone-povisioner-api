@@ -1,7 +1,6 @@
 import {UnitOfWork} from '../unitOfWork';
 import {Device} from "../models/device";
-import {Config} from "../models/config";
-import * as uuid from 'uuid';
+import * as randomstring from 'randomstring';
 
 export class DeviceRepository {
     uow: UnitOfWork;
@@ -22,8 +21,8 @@ export class DeviceRepository {
                     name: null,
                     status: 'initial',
                     kazoo_id: null,
-                    user: uuid.v4(),
-                    password: uuid.v4()
+                    user: randomstring.generate(10),
+                    password: randomstring.generate(10)
                 }).returning('kazoo_id');
         } catch (err) {
             this.uow.logger.error('Failed to add device');
