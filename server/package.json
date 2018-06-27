@@ -12,8 +12,12 @@
   "author": "Seven Hills Technology",
   "license": "ISC",
   "dependencies": {
+    "@types/hapi": "^16.1.12",
     "@types/node": "^9.3.0",
+    "axios": "^0.18.0",
+    "hapi": "^17.2.0",
     "hapijs-starter": "^3.5.0",
+    "joi": "^13.4.0",
     "path": "^0.12.7"
   },
   "devDependencies": {
