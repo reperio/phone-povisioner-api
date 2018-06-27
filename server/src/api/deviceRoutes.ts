@@ -1,18 +1,19 @@
 import {Request} from 'hapi';
-import * as fs from 'fs';
-import * as path from 'path';
+import KazooService from '../services/kazooService';
 
 const routes = [
     {
         method: 'GET',
         path: '/devices/devices',
         handler: async (request: Request, h: any) => {
+            const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
             logger.debug(`Running /devices/devices.`);
 
             try {
-
+                const devices = await uow.deviceRepository.getDevices();
+                return devices;
             } catch(e) {
                 return h.response().code(500);
             }
@@ -23,15 +24,33 @@ const routes = [
     },
     {
         method: 'POST',
-        path: '/devices/adopt-device/{address}',
+        path: '/devices/adopt-device',
         handler: async (request: Request, h: any) => {
+            const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
             logger.debug(`Running /devices/adopt. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
+                const kazooService = new KazooService();
+                await kazooService.authenticate();
+                const devices = await kazooService.getDevices(request.payload.organization);
+                const device = devices.find((d:any) => d.id === request.payload.id);
+                if(device === undefined) {
+                    logger.error('Device not found.');
+                    return h.response().code(404);
+                }
+                await uow.deviceRepository.updateDevice(request.payload.address, {
+                    organization: request.payload.organization,
+                    name: device.name,
+                    kazoo_id: device.id,
+                    status: 'adopted'
+                });
 
+                return h.response().code(200);
             } catch(e) {
+                logger.error('Failed to adopt device');
+                logger.error(e.toString());
                 return h.response().code(500);
             }
         },

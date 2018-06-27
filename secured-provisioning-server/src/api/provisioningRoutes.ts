@@ -141,32 +141,6 @@ const routes: any[] = [
         config: {
             auth: 'conditionalAuth'
         }
-    },
-    {
-        method: 'POST',
-        path: '/temp/assign-device/{address}',
-        handler: async (request: Request, h: any) => {
-            const uow = await request.app.getNewUoW();
-            const logger = request.server.app.logger;
-
-            logger.debug(`Assigning device ${request.params.address}. Raw params:\n${JSON.stringify(request.params)}`);
-
-            try {
-                await uow.deviceRepository.updateDevice(request.params.address, {
-                    organization: 'd38abe802090d3216dff4993fd5ee186',
-                    name: 'Test Phone',
-                    kazoo_id: '0000',
-                    status: 'adopted'
-                });
-
-                return h.response().code(200);
-            } catch(e) {
-                return h.response().code(500);
-            }
-        },
-        config: {
-            auth: false
-        }
     }
 ];
 
