@@ -5,6 +5,7 @@ export class Organization extends BaseModel {
     type: string;
     enabled: boolean;
     name: string;
+    realm: string;
 
     static get tableName() {
         return 'organizations';
