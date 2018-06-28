@@ -23,6 +23,28 @@ const routes = [
         }
     },
     {
+        method: 'GET',
+        path: '/devices/devices',
+        handler: async (request: Request, h: any) => {
+            const uow = await request.app.getNewUoW();
+            const logger = request.server.app.logger;
+
+            logger.debug(`Running /devices/kazoo-devices.`);
+
+            try {
+                const kazooService = new KazooService();
+                await kazooService.authenticate();
+                const devices = await kazooService.getDevices(request.payload.organization);
+                return devices;
+            } catch(e) {
+                return h.response().code(500);
+            }
+        },
+        config: {
+            auth: false
+        }
+    },
+    {
         method: 'POST',
         path: '/devices/adopt-device',
         handler: async (request: Request, h: any) => {
