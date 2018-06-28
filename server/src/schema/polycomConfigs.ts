@@ -46,20 +46,57 @@ export const soundpointIPConfig: SchemaMap = {
 }
 
 export const soundpointIP330Config: SchemaMap = {
-
+    reg1Address: string(),
+    reg2Address: string(),
+    reg1Transport: string(),
+    reg2Transport: string(),
+    reg1Port: number(),
+    reg2Port: number(),
+    reg1Expires: number(),
+    reg2Expires: number(),
+    reg1Overlap: number(),
+    reg2Overlap: number()
 }
 
 export const soundpointIP331Config: SchemaMap = {
-    urlModeDialing: bool()
+    urlModeDialing: bool(),
+    reg1Address: string(),
+    reg2Address: string(),
+    reg1Transport: string(),
+    reg2Transport: string(),
+    reg1Port: number(),
+    reg2Port: number(),
+    reg1Expires: number(),
+    reg2Expires: number(),
+    reg1Overlap: number(),
+    reg2Overlap: number()
 }
 
 export const soundpointIP335Config: SchemaMap = {
-    urlModeDialing: bool()
+    urlModeDialing: bool(),
+    reg1Address: string(),
+    reg2Address: string(),
+    reg1Transport: string(),
+    reg2Transport: string(),
+    reg1Port: number(),
+    reg2Port: number(),
+    reg1Expires: number(),
+    reg2Expires: number(),
+    reg1Overlap: number(),
+    reg2Overlap: number()
 }
 
-export const soundpointIP670Config: SchemaMap = {
+let spip670: SchemaMap = {
     bypassInstantMessage: bool()
 }
+for(let i = 1; i <= 34; i++) {
+    spip670[`reg${i}Address`] = string();
+    spip670[`reg${i}Transport`] = string();
+    spip670[`reg${i}Port`] = number();
+    spip670[`reg${i}Expires`] = number();
+    spip670[`reg${i}Overlap`] = number();
+}
+export const soundpointIP670Config: SchemaMap = spip670;
 
 export const soundpointIP6000Config: SchemaMap = {
     bypassInstantMessage: bool()

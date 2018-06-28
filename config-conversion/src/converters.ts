@@ -61,6 +61,11 @@ export function soundpointIPConverter(config: any, user?: string, password?: str
             .tryAddProperty('@prov.polling.period', config.pollingPeriod)
             .tryAddProperty('@prov.polling.time', config.pollingTime)
             .tryAddProperty('@prov.polling.timeRandomEnd', config.pollingTimeRandomEnd)
+            .tryAddProperties((i:number) => `@reg.${i}.server.1.address`, (i:number) => config[`reg${i}Address`], 1, 34)
+            .tryAddProperties((i:number) => `@reg.${i}.server.1.transport`, (i:number) => config[`reg${i}Transport`], 1, 34)
+            .tryAddProperties((i:number) => `@reg.${i}.server.1.port`, (i:number) => config[`reg${i}Port`], 1, 34)
+            .tryAddProperties((i:number) => `@reg.${i}.server.1.expires`, (i:number) => config[`reg${i}Expires`], 1, 34)
+            .tryAddProperties((i:number) => `@reg.${i}.server.1.overlap`, (i:number) => config[`reg${i}Overlap`], 1, 34)
             .val()
     }, {version: '1.0', encoding: 'UTF-8', standalone: true});
 
