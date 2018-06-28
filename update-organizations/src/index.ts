@@ -65,7 +65,7 @@ async function syncOrganizations() : Promise<void> {
         logger.info('Adding new organizations to the database');
         for(let i = 0; i < organizations.length; i++) {
             const org = organizations[i];
-            await uow.organizationRepository.addOrganization(org.id, org.name);
+            await uow.organizationRepository.addOrganization(org.id, org.name, org.realm);
         }
 
         await uow.commitTransaction();

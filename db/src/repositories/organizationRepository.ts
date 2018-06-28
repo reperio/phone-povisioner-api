@@ -22,7 +22,7 @@ export class OrganizationRepository {
         }
     }
 
-    async addOrganization(id: string, name: string) {
+    async addOrganization(id: string, name: string, realm: string) {
         try {
             //Add all configs from the default config
             //TODO: could this be made into a subquery?
@@ -35,12 +35,12 @@ export class OrganizationRepository {
             //Add organization row
             await this.uow.transaction.raw(`
                 insert into "organizations"
-                    ("enabled", "id", "type", "name")
-                    values (true, ?, 'normal', ?)
+                    ("enabled", "id", "type", "name", "realm")
+                    values (true, ?, 'normal', ?, ?)
                 on conflict ("id") do update
-                    set "name" = ?, enabled = true where "organizations"."id" = ?
+                    set "name" = ?, "realm" = ?, enabled = true where "organizations"."id" = ?
                 returning "id"
-            `, [id, name, name, id]);
+            `, [id, name, realm, name, realm, id]);
 
             //Adds the config options for the organization
             let values = '(?, ?, ?, ?, ?), '.repeat(defaultConfigs.length);
