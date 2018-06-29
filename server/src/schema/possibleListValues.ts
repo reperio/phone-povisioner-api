@@ -10,3 +10,11 @@ export const possibleCodecPrefValues: string[] = [
 ];
 
 export const possibleCallBackModeValues = ['contact', 'registration', 'disabled'];
+
+export const possibleTransportValues = [
+    'DNSnaptr',
+    'TCPpreferred',
+    'UDPOnly',
+    'TLS',
+    'TCPOnly'
+];
