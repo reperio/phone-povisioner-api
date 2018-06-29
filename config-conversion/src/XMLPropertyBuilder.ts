@@ -47,6 +47,16 @@ export class XMLPropertyBuilder {
         return this;
     }
 
+    tryAddPropertiesFlatTree(names: (i: number) => string, values: (i: number) => any, min: number, max: number) : XMLPropertyBuilder {
+        for(let i = min; i <= max; i++) {
+            const value = values(i);
+            if(value !== undefined) {
+                this.obj[names(i)] = value;
+            }
+        }
+        return this;
+    }
+
     val() : any {
         return this.obj;
     }

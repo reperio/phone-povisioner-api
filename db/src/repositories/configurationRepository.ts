@@ -109,7 +109,7 @@ export class ConfigurationRepository {
 
     async getModelInfo(model: string, organization: string) {
         try {
-            const info = await Family
+            const info = await PhoneModel
                 .query(this.uow.transaction)
                 .select('models.component_name as model_name', 'families.component_name as family_name', 'manufacturers.component_name as manufacturer_name')
                 .where('models.id', model)
