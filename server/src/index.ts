@@ -1,5 +1,5 @@
 import {UnitOfWork} from '../../db';
-import {Server} from 'hapijs-starter';
+const Server = require('hapijs-starter');
 import * as path from 'path';
 import {Request} from 'hapi';
 import {Config} from './config';
