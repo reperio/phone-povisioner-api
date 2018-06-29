@@ -12,10 +12,11 @@
   "author": "Seven Hills Technology",
   "license": "ISC",
   "dependencies": {
+    "@types/hapi": "^16.1.12",
     "@types/node": "^9.3.0",
     "@types/xmlbuilder": "0.0.32",
     "hapi-auth-basic": "^5.0.0",
-    "hapijs-starter": "^3.5.0",
+    "hapijs-starter": "^4.1.0",
     "path": "^0.12.7",
     "xmlbuilder": "^10.0.0"
   },
