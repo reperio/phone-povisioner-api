@@ -47,11 +47,11 @@ export class XMLPropertyBuilder {
         return this;
     }
 
-    tryAddProperties(names: (i: number) => string, values: (i: number) => any, min: number, max: number) : XMLPropertyBuilder {
+    tryAddPropertiesFlatTree(names: (i: number) => string, values: (i: number) => any, min: number, max: number) : XMLPropertyBuilder {
         for(let i = min; i <= max; i++) {
             const value = values(i);
             if(value !== undefined) {
-                this.addProperty(names(i), value);
+                this.obj[names(i)] = value;
             }
         }
         return this;
