@@ -4,17 +4,41 @@ import KazooService from '../services/kazooService';
 const routes = [
     {
         method: 'GET',
-        path: '/devices/devices',
+        path: '/devices/devices/{organization}',
         handler: async (request: Request, h: any) => {
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Running /devices/devices.`);
+            logger.debug(`Running /devices/devices. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
-                const devices = await uow.deviceRepository.getDevices();
+                const devices = await uow.deviceRepository.getDevices(request.params.organization);
                 return devices;
             } catch(e) {
+                return h.response().code(500);
+            }
+        },
+        config: {
+            auth: false
+        }
+    },
+    {
+        method: 'GET',
+        path: '/devices/kazoo-devices/{organization}',
+        handler: async (request: Request, h: any) => {
+            const uow = await request.app.getNewUoW();
+            const logger = request.server.app.logger;
+
+            logger.debug(`Running /devices/kazoo-devices. Raw params:\n${JSON.stringify(request.params)}`);
+
+            try {
+                const kazooService = new KazooService();
+                await kazooService.authenticate();
+                const devices = await kazooService.getDevices(request.params.organization);
+                return devices;
+            } catch(e) {
+                logger.error('Failed to fetch Kazoo devices');
+                logger.error(e.toString());
                 return h.response().code(500);
             }
         },

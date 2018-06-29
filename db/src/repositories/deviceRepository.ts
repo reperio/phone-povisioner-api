@@ -45,10 +45,29 @@ export class DeviceRepository {
         }
     }
 
-    async getDevices() : Promise<Device[]> {
+    async getDevices(organization: string) : Promise<Device[]> {
         try {
             const devices = await Device
-                .query(this.uow.transaction);
+                .query(this.uow.transaction)
+                .select(
+                    'devices.mac_address as mac_address',
+                    'manufacturers.name as manufactuer',
+                    'families.name as family',
+                    'models.name as model',
+                    'devices.firmware_version as firmware_version',
+                    'devices.name as name',
+                    'devices.status as status'
+                )
+                .where('devices.organization', organization)
+                .innerJoin('models', function() {
+                    this.on('devices.model', 'models.id')
+                })
+                .innerJoin('families', function() {
+                    this.on('models.family', 'families.id')
+                })
+                .innerJoin('manufacturers', function() {
+                    this.on('families.manufacturer', 'manufacturers.id')
+                });
 
             return devices;
         } catch (err) {
