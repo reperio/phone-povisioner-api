@@ -1,0 +1,19 @@
+{
+  "name": "kazoo-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./lib/kazooService.js",
+  "typings": "./lib/kazooService.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "author": "Seven Hills Technology",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^2.9.2"
+  },
+  "dependencies": {
+    "axios": "^0.18.0"
+  }
+}

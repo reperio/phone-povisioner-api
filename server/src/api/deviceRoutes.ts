@@ -1,5 +1,5 @@
 import {Request} from 'hapi';
-import KazooService from '../services/kazooService';
+import KazooService from '../../../kazoo';
 
 const routes = [
     {
@@ -33,7 +33,7 @@ const routes = [
 
             try {
                 const kazooService = new KazooService();
-                await kazooService.authenticate();
+                await kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
                 const devices = await kazooService.getDevices(request.params.organization);
                 return devices;
             } catch(e) {
@@ -53,11 +53,11 @@ const routes = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Running /devices/adopt. Raw payload:\n${JSON.stringify(request.payload)}`);
+            logger.debug(`Running /devices/adopt. Raw pasyload:\n${JSON.stringify(request.payload)}`);
 
             try {
                 const kazooService = new KazooService();
-                await kazooService.authenticate();
+                await kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
                 const devices = await kazooService.getDevices(request.payload.organization);
                 const device = devices.find((d:any) => d.id === request.payload.id);
                 if(device === undefined) {
