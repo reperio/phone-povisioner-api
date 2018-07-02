@@ -35,7 +35,11 @@ export class DeviceRepository {
         try {
             const device = await Device
                 .query(this.uow.transaction)
-                .where('mac_address', mac_address);
+                .select('devices.*', 'organizations.realm as realm')
+                .where('mac_address', mac_address)
+                .join('organizations', function() {
+                    this.on('devices.organization', 'organizations.id')
+                });
 
             return device.length > 0 ? device[0] : null;
         } catch (err) {

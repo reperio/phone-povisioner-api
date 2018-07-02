@@ -1,7 +1,8 @@
 import * as builder from 'xmlbuilder';
 import {XMLPropertyBuilder} from './XMLPropertyBuilder';
+import {RegistrationInfo} from "./registrationInfo";
 
-export function soundpointIPConverter(config: any, user?: string, password?: string) : string {
+export function soundpointIPConverter(config: any, user?: string, password?: string, registrationInfo?: RegistrationInfo) : string {
     let xml = builder.create({
         polycomConfig: new XMLPropertyBuilder()
             .tryAddProperty('@xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
@@ -61,7 +62,7 @@ export function soundpointIPConverter(config: any, user?: string, password?: str
             .tryAddProperty('@prov.polling.period', config.pollingPeriod)
             .tryAddProperty('@prov.polling.time', config.pollingTime)
             .tryAddProperty('@prov.polling.timeRandomEnd', config.pollingTimeRandomEnd)
-            .tryAddProperty('reg', new XMLPropertyBuilder()
+            .tryAddProperty('reg', registrationInfo && new XMLPropertyBuilder()
                 .tryAddPropertiesFlatTree((i:number) => `@reg.${i}.server.1.address`, (i:number) => config[`reg${i}Address`], 1, 34)
                 .tryAddPropertiesFlatTree((i:number) => `@reg.${i}.server.1.transport`, (i:number) => config[`reg${i}Transport`], 1, 34)
                 .tryAddPropertiesFlatTree((i:number) => `@reg.${i}.server.1.port`, (i:number) => config[`reg${i}Port`], 1, 34)

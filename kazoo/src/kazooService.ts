@@ -45,7 +45,7 @@ export default class KazooService {
         return response.data.data;
     }
 
-    async getDevice(organization: string, device: string) : Promise<any[]> {
+    async getDevice(organization: string, device: string) : Promise<any> {
         if(!this.credentials) {
             throw new Error('Credentials not set.');
         }

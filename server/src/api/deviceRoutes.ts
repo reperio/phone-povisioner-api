@@ -58,12 +58,7 @@ const routes = [
             try {
                 const kazooService = new KazooService();
                 await kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
-                const devices = await kazooService.getDevices(request.payload.organization);
-                const device = devices.find((d:any) => d.id === request.payload.id);
-                if(device === undefined) {
-                    logger.error('Device not found.');
-                    return h.response().code(404);
-                }
+                const device = await kazooService.getDevice(request.payload.organization, request.payload.id);
                 await uow.deviceRepository.updateDevice(request.payload.address, {
                     organization: request.payload.organization,
                     name: device.name,

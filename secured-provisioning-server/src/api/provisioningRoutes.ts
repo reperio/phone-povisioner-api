@@ -3,6 +3,8 @@ import {soundpointIPConverter, getModelIDFromPath} from "../../../config-convers
 import {parseUserAgentHeader} from "../utils/parseUserAgentHeader";
 import * as builder from 'xmlbuilder';
 import {firmwareVersion} from '../../../config-conversion';
+import {RegistrationInfo} from "../../../config-conversion";
+import KazooService from '../../../kazoo';
 
 const routes: any[] = [
     {
@@ -60,6 +62,18 @@ const routes: any[] = [
                     template = soundpointIPConverter(config, device.user, device.password);
                     const status = device.status === 'adopted' ? 'initial_credentials' : 'given_credentials';
                     await uow.deviceRepository.updateDevice(userAgent.macAddress, {status});
+                } else if (address === device.user) {
+                    const kazooService = new KazooService();
+                    kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
+                    const kazooDevice = await kazooService.getDevice(device.organization, device.kazoo_id);
+                    template = soundpointIPConverter(config, undefined, undefined, {
+                        username: kazooDevice.sip.username,
+                        password: kazooDevice.sip.password,
+                        realm: device.realm
+                    });
+                    if(device.status === 'given_credentials') {
+                        await uow.deviceRepository.updateDevice(userAgent.macAddress, {status: 'provisioned'});
+                    }
                 } else {
                     template = soundpointIPConverter(config);
                 }
