@@ -2,7 +2,7 @@ import * as builder from 'xmlbuilder';
 import {XMLPropertyBuilder} from './XMLPropertyBuilder';
 import {RegistrationInfo} from "./registrationInfo";
 
-export function soundpointIPConverter(config: any, user?: string, password?: string, registrationInfo?: RegistrationInfo) : string {
+export function soundpointIPConverter(config: any, user?: string, password?: string, registrationInfo?: RegistrationInfo[]) : string {
     let xml = builder.create({
         polycomConfig: new XMLPropertyBuilder()
             .tryAddProperty('@xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
@@ -68,6 +68,12 @@ export function soundpointIPConverter(config: any, user?: string, password?: str
                 .tryAddPropertiesFlatTree((i:number) => `@reg.${i}.server.1.port`, (i:number) => config[`reg${i}Port`], 1, 34)
                 .tryAddPropertiesFlatTree((i:number) => `@reg.${i}.server.1.expires`, (i:number) => config[`reg${i}Expires`], 1, 34)
                 .tryAddPropertiesFlatTree((i:number) => `@reg.${i}.server.1.expires.overlap`, (i:number) => config[`reg${i}Overlap`], 1, 34)
+                .tryAddPropertiesFlatTree((i:number) => `@reg.${i}.address`, (i: number) => `${registrationInfo[i].username}@${registrationInfo[i].realm}`, 0, registrationInfo.length)
+                .tryAddPropertiesFlatTree((i:number) => `@reg.${i}.auth.userId`, (i: number) => registrationInfo[i].username, 0, registrationInfo.length)
+                .tryAddPropertiesFlatTree((i:number) => `@reg.${i}.password`, (i: number) => registrationInfo[i].password, 0, registrationInfo.length)
+                .tryAddProperty('@reg.1.displayName', 'Test Phone')//
+                .tryAddProperty('@reg.1.label', 'Test Label')//
+                .tryAddProperty('@reg.1.lineKeys', 1)//
                 .val()
             )
             .val()

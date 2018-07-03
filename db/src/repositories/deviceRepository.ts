@@ -31,9 +31,9 @@ export class DeviceRepository {
         }
     }
 
-    async getDevice(mac_address: string) : Promise<Device> {
+    async getDevicesFromPhone(mac_address: string) : Promise<Device[]> {
         try {
-            const device = await Device
+            const devices = await Device
                 .query(this.uow.transaction)
                 .select('devices.*', 'organizations.realm as realm')
                 .where('mac_address', mac_address)
@@ -41,7 +41,7 @@ export class DeviceRepository {
                     this.on('devices.organization', 'organizations.id')
                 });
 
-            return device.length > 0 ? device[0] : null;
+            return devices;
         } catch (err) {
             this.uow.logger.error('Failed to fetch device');
             this.uow.logger.error(err);
@@ -49,7 +49,7 @@ export class DeviceRepository {
         }
     }
 
-    async getDevices(organization: string) : Promise<Device[]> {
+    async getDevicesFromOrganization(organization: string) : Promise<Device[]> {
         try {
             const devices = await Device
                 .query(this.uow.transaction)

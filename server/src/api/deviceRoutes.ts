@@ -12,7 +12,7 @@ const routes = [
             logger.debug(`Running /devices/devices. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
-                const devices = await uow.deviceRepository.getDevices(request.params.organization);
+                const devices = await uow.deviceRepository.getDevicesFromOrganization(request.params.organization);
                 return devices;
             } catch(e) {
                 return h.response().code(500);
@@ -53,7 +53,7 @@ const routes = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Running /devices/adopt. Raw pasyload:\n${JSON.stringify(request.payload)}`);
+            logger.debug(`Running /devices/adopt. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
                 const kazooService = new KazooService();

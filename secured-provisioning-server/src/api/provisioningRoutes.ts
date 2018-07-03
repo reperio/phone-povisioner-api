@@ -1,9 +1,7 @@
 import {Request} from "hapi";
-import {soundpointIPConverter, getModelIDFromPath} from "../../../config-conversion";
+import {soundpointIPConverter, getModelIDFromPath, firmwareVersion, RegistrationInfo} from "../../../config-conversion";
 import {parseUserAgentHeader} from "../utils/parseUserAgentHeader";
 import * as builder from 'xmlbuilder';
-import {firmwareVersion} from '../../../config-conversion';
-import {RegistrationInfo} from "../../../config-conversion";
 import KazooService from '../../../kazoo';
 
 const routes: any[] = [
@@ -25,9 +23,9 @@ const routes: any[] = [
                     return h.response().code(404);
                 }
 
-                const device = await uow.deviceRepository.getDevice(userAgent.macAddress);
+                const devices = await uow.deviceRepository.getDevicesFromPhone(userAgent.macAddress);
 
-                if(device === null) {
+                if(devices.length === 0) {
                     await uow.deviceRepository.addDevice(
                         userAgent.model, userAgent.macAddress, userAgent.firmwareVersion
                     );
@@ -35,15 +33,18 @@ const routes: any[] = [
                     return h.response().code(404);
                 }
 
+                //TODO: determine which device to choose
+                const device = devices[0];
+
                 if(device.status === 'initial') {
                     logger.debug(`Request failed: device is not adopted.`);
                     return h.response().code(404);
                 }
 
                 const a = request.params.address;
-                const address = `${a[0]}${a[1]}:${a[2]}${a[3]}:${a[4]}${a[5]}:${a[6]}${a[7]}:${a[8]}${a[9]}:${a[10]}${a[11]}`;
-                if(address !== device.user && address !== userAgent.macAddress) {
-                    logger.debug(`Request failed: URL doesn't match mac address in user agent.`);
+                logger.debug(`\n\n\n\n\n${request.params.address}\n${userAgent.macAddress.replace(/:/g, '')}\n\n\n\n\n`);
+                if((request.params.address !== device.user || device.status !== 'given_credentials') && request.params.address !== userAgent.macAddress.replace(/:/g, '')) {
+                    logger.debug(`Request failed: URL doesn't match username in db or mac address in user agent.`);
                     return h.response().code(404);
                 }
 
@@ -62,15 +63,17 @@ const routes: any[] = [
                     template = soundpointIPConverter(config, device.user, device.password);
                     const status = device.status === 'adopted' ? 'initial_credentials' : 'given_credentials';
                     await uow.deviceRepository.updateDevice(userAgent.macAddress, {status});
-                } else if (address === device.user) {
+                } else if (request.params.address === device.user) {
                     const kazooService = new KazooService();
                     kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
-                    const kazooDevice = await kazooService.getDevice(device.organization, device.kazoo_id);
-                    template = soundpointIPConverter(config, undefined, undefined, {
-                        username: kazooDevice.sip.username,
-                        password: kazooDevice.sip.password,
-                        realm: device.realm
-                    });
+                    template = soundpointIPConverter(config, undefined, undefined, devices.map(async (d:any) => {
+                        const kazooDevice = await kazooService.getDevice(d.organization, d.kazoo_id);
+                        return {
+                            username: kazooDevice.sip.username,
+                            password: kazooDevice.sip.password,
+                            realm: d.realm
+                        };
+                    }));
                     if(device.status === 'given_credentials') {
                         await uow.deviceRepository.updateDevice(userAgent.macAddress, {status: 'provisioned'});
                     }
@@ -78,7 +81,8 @@ const routes: any[] = [
                     template = soundpointIPConverter(config);
                 }
 
-                //if address === device.user, add other props and set status to provisioned
+                logger.debug('Sent config');
+                logger.debug(template);
 
                 return h.response(template).header('Content-Type', 'text/xml');
             } catch(e) {
@@ -106,16 +110,19 @@ const routes: any[] = [
                     return h.response().code(404);
                 }
 
-                const device = await uow.deviceRepository.getDevice(userAgent.macAddress);
+                const devices = await uow.deviceRepository.getDevicesFromPhone(userAgent.macAddress);
 
                 //Concurrency issues with the other route?
-                if(device === null) {
+                if(devices.length === 0) {
                     await uow.deviceRepository.addDevice(
                         userAgent.model, userAgent.macAddress, userAgent.firmwareVersion
                     );
                     logger.debug(`Added device: ${userAgent.macAddress}`);
                     return h.response().code(404);
                 }
+
+                //TODO: determine which device to choose
+                const device = devices[0];
 
                 if(device.status === 'initial') {
                     logger.debug(`Request failed: device is not adopted.`);
@@ -143,7 +150,8 @@ const routes: any[] = [
                 builderObj[`APPLICATION_${userAgent.applicationTag}`][`@APP_FILE_PATH_${userAgent.applicationTag}`] = firmwareVersion(
                     await uow.configurationRepository.composeBaseConfig(userAgent.model, '1')
                 );
-                builderObj[`APPLICATION_${userAgent.applicationTag}`][`@CONFIG_FILES_${userAgent.applicationTag}`] = `/${device.user}.cfg`;
+                builderObj[`APPLICATION_${userAgent.applicationTag}`][`@CONFIG_FILES_${userAgent.applicationTag}`]
+                    = device.status === 'given_credentials' ? `/${device.user}.cfg` : `/${userAgent.macAddress.replace(/:/g, '')}.cfg`;
 
                 const xml = builder.create(builderObj,{version: '1.0', standalone: true});
 
