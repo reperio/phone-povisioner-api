@@ -3,11 +3,25 @@ const Server = require('hapijs-starter');
 import * as path from 'path';
 import {Request} from 'hapi';
 import {Config} from './config';
+import {parseUserAgentHeader} from "./utils/parseUserAgentHeader";
 
-async function validate(request: Request, username: string, password: string) {
+async function validate(request: Request, username: string, password: string, h: any) {
+    const uow = await request.app.getNewUoW();
+    const logger = request.server.app.logger;
+
+    logger.debug(`Received user-agent: ${request.headers['user-agent']}`);
+    const userAgent = parseUserAgentHeader(request.headers['user-agent']);
+    if(!userAgent.macAddress || !userAgent.firmwareVersion || !userAgent.model || !userAgent.type || !userAgent.transportType || !userAgent.applicationTag) {
+        logger.debug('Request failed: invalid user-agent header.');
+        logger.debug(JSON.stringify((userAgent)));
+        return {
+            response: h.response().code(404)
+        };
+    }
+
     return {
         isValid: true,
-        credentials: {username, password}
+        credentials: {username, password, userAgent}
     };
 }
 
@@ -31,7 +45,7 @@ async function startServer() : Promise<void> {
         });
 
         await server.registerAdditionalPlugin(require('hapi-auth-basic'));
-        server.strategy('conditionalAuth', 'basic', {validate});
+        server.strategy('provisioningAuth', 'basic', {validate});
 
         await server.startServer();
         await server.registerRoutesFromDirectory(path.resolve(__dirname, './api'));
