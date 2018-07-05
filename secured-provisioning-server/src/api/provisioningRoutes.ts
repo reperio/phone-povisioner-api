@@ -33,29 +33,39 @@ const routes: any[] = [
                 }
 
                 const a = request.params.address;
-                logger.debug(`\n\n\n\n\n${request.params.address}\n${request.auth.credentials.userAgent.rawMacAddress}\n\n\n\n\n`);
                 if(request.params.address !== request.auth.credentials.userAgent.rawMacAddress) {
                     logger.debug(`Request failed: URL doesn't match mac address in user agent.`);
                     return h.response().code(404);
                 }
 
-                /*if(device.status === 'given_credentials' || device.status === 'provisioned') {
+                if(device.status === 'given_credentials' || device.status === 'provisioned') {
                     if(!request.auth.isAuthenticated || request.auth.credentials.username !== device.user || request.auth.credentials.password !== device.password) {
                         logger.debug(`Request failed: failed authentication.`);
                         return h.response().code(401).header('WWW-Authenticate', 'Basic realm="Restricted Content"');
                     }
-                }*/
+                }
 
                 const config = await uow.configurationRepository.composeConfig(device.model, device.organization);
                 logger.debug(`Composed config: ${JSON.stringify(config)}`);
 
                 let template;
-                if (device.status === 'adopted' || device.status === 'initial_credentials') {
-                    template = soundpointIPConverter(config, device.user, device.password);
-                    const status = device.status === 'adopted' ? 'initial_credentials' : 'given_credentials';
-                    await uow.deviceRepository.updateDevice(request.auth.credentials.userAgent.macAddress, {status});
+                if (device.status === 'given_credentials' || device.status === 'provisioned') {
+                    if(device.status === 'given_credentials') {
+                        await uow.deviceRepository.updateDevice(request.auth.credentials.userAgent.macAddress, {status: 'provisioned'});
+                    }
+
+                    const kazooService = new KazooService();
+                    kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
+                    template = soundpointIPConverter(config, undefined, undefined, devices.map(async (d:any) => {
+                        const kazooDevice = await kazooService.getDevice(d.organization, d.kazoo_id);
+                        return {
+                            username: kazooDevice.sip.username,
+                            password: kazooDevice.sip.password,
+                            realm: d.realm
+                        };
+                    }));
                 } else {
-                    template = soundpointIPConverter(config, device.user, device.password);//
+                    template = soundpointIPConverter(config);
                 }
 
                 logger.debug('Sent config');
@@ -89,7 +99,7 @@ const routes: any[] = [
                 //TODO: determine which device to choose
                 const device = devices[0];
 
-                if(device.status !== 'given_credentials') {
+                if(device.status !== 'adopted' && device.status !== 'initial_credentials') {
                     logger.debug(`Request failed: url is not available.`);
                     return h.response().code(404);
                 }
@@ -107,18 +117,9 @@ const routes: any[] = [
                 const config = await uow.configurationRepository.composeConfig(device.model, device.organization);
                 logger.debug(`Composed config: ${JSON.stringify(config)}`);
 
-                await uow.deviceRepository.updateDevice(request.auth.credentials.userAgent.macAddress, {status: 'provisioned'});
-
-                const kazooService = new KazooService();
-                kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
-                const template = soundpointIPConverter(config, undefined, undefined, devices.map(async (d:any) => {
-                    const kazooDevice = await kazooService.getDevice(d.organization, d.kazoo_id);
-                    return {
-                        username: kazooDevice.sip.username,
-                        password: kazooDevice.sip.password,
-                        realm: d.realm
-                    };
-                }));
+                const template = soundpointIPConverter(config, device.user, device.password);
+                const status = device.status === 'adopted' ? 'initial_credentials' : 'given_credentials';
+                await uow.deviceRepository.updateDevice(request.auth.credentials.userAgent.macAddress, {status});
 
                 logger.debug('Sent config');
                 logger.debug(template);
@@ -183,7 +184,8 @@ const routes: any[] = [
                     await uow.configurationRepository.composeBaseConfig(request.auth.credentials.userAgent.model, '1')
                 );
                 builderObj[`APPLICATION_${request.auth.credentials.userAgent.applicationTag}`][`@CONFIG_FILES_${request.auth.credentials.userAgent.applicationTag}`]
-                    = device.status === 'given_credentials' ? `/temp/${device.user}.cfg` : `/${request.auth.credentials.userAgent.rawMacAddress}.cfg`;
+                    = device.status === 'adopted' || device.status === 'initial_credentials'
+                    ? `/temp/${device.user}.cfg` : `/${request.auth.credentials.userAgent.rawMacAddress}.cfg`;
 
                 const xml = builder.create(builderObj,{version: '1.0', standalone: true});
 
