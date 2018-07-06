@@ -6,14 +6,19 @@ import KazooService from '../../../kazoo';
 const routes: any[] = [
     {
         method: 'GET',
-        path: '/{address}.cfg',
+        path: '/{address}-provisioned.cfg',
         handler: async (request: Request, h: any) => {
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Fetching ${request.params.address}.cfg. Raw params:\n${JSON.stringify(request.params)}`);
+            logger.debug(`Fetching ${request.params.address}-provisioned.cfg. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
+                if(request.params.address !== request.auth.credentials.userAgent.rawMacAddress) {
+                    logger.debug(`Request failed: URL doesn't match mac address in user agent.`);
+                    return h.response().code(404);
+                }
+
                 const devices = await uow.deviceRepository.getDevicesFromPhone(request.auth.credentials.userAgent.macAddress);
 
                 if(devices.length === 0) {
@@ -29,12 +34,6 @@ const routes: any[] = [
 
                 if(device.status === 'initial') {
                     logger.debug(`Request failed: device is not adopted.`);
-                    return h.response().code(404);
-                }
-
-                const a = request.params.address;
-                if(request.params.address !== request.auth.credentials.userAgent.rawMacAddress) {
-                    logger.debug(`Request failed: URL doesn't match mac address in user agent.`);
                     return h.response().code(404);
                 }
 
@@ -104,7 +103,7 @@ const routes: any[] = [
                     return h.response().code(404);
                 }
 
-                if(request.params.address !== device.user) {
+                if(request.params.user !== device.user) {
                     logger.debug(`Request failed: URL doesn't match username in db.`);
                     return h.response().code(404);
                 }
@@ -130,14 +129,19 @@ const routes: any[] = [
     },
     {
         method: 'GET',
-        path: '/000000000000.cfg',
+        path: '/{address}.cfg',
         handler: async (request: Request, h: any) => {
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            logger.debug(`Fetching 000000000000.cfg. Raw params:\n${JSON.stringify(request.params)}`);
+            logger.debug(`Fetching ${request.params.address}.cfg. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
+                if(request.params.address !== request.auth.credentials.userAgent.rawMacAddress) {
+                    logger.debug(`Request failed: URL doesn't match mac address in user agent.`);
+                    return h.response().code(404);
+                }
+
                 const devices = await uow.deviceRepository.getDevicesFromPhone(request.auth.credentials.userAgent.macAddress);
 
                 //Concurrency issues with the other route?
@@ -180,7 +184,7 @@ const routes: any[] = [
                 );
                 builderObj[`APPLICATION_${request.auth.credentials.userAgent.applicationTag}`][`@CONFIG_FILES_${request.auth.credentials.userAgent.applicationTag}`]
                     = device.status === 'adopted' || device.status === 'initial_credentials'
-                    ? `/temp/${device.user}.cfg` : `/${request.auth.credentials.userAgent.rawMacAddress}.cfg`;
+                    ? `/temp/${device.user}.cfg` : `/${request.auth.credentials.userAgent.rawMacAddress}-provisioned.cfg`;
 
                 const xml = builder.create(builderObj,{version: '1.0', standalone: true});
 
