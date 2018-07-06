@@ -1,7 +1,7 @@
 import {UnitOfWork} from '../../db';
 import {Logger, transports} from 'winston';
 import 'winston-daily-rotate-file';
-import axios from 'axios';
+import KazooService from '../../kazoo'
 
 const logger = new Logger({
     transports: [
@@ -25,33 +25,16 @@ const logger = new Logger({
     ]
 });
 
-async function fetchOrganizations() : Promise<any[]> {
-    logger.info('Renewing API auth');
-    const authResponse = await axios.put('https://crossbar.reper.io/v2/user_auth', {
-        data: {
-            credentials: process.env.CREDENTIALS,
-            account_name: process.env.ACCOUNT_NAME
-        }
-    });
-
-    logger.info('Fetching new organizations');
-    const descendantsResponse = await axios.get(
-        `https://crossbar.reper.io/v2/accounts/${process.env.ACCOUNT_ID}/descendants`,
-        {
-            headers: {
-                'X-Auth-Token': authResponse.data.auth_token
-            }
-        }
-    );
-    return descendantsResponse.data.data;
-}
-
 async function syncOrganizations() : Promise<void> {
     const uow = new UnitOfWork(logger);
 
     try {
         const cachedOrganizations = await uow.organizationRepository.getOrganizations();
-        const organizations = await fetchOrganizations();
+        const kazooService = new KazooService();
+        logger.info('Renewing API auth');
+        await kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
+        logger.info('Fetching new organizations');
+        const organizations = await kazooService.getOrganizations(process.env.ACCOUNT_ID);
 
         await uow.beginTransaction();
 

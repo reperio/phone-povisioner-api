@@ -1,5 +1,5 @@
 import {Request} from 'hapi';
-import KazooService from '../services/kazooService';
+import KazooService from '../../../kazoo';
 
 const routes = [
     {
@@ -12,7 +12,7 @@ const routes = [
             logger.debug(`Running /devices/devices. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
-                const devices = await uow.deviceRepository.getDevices(request.params.organization);
+                const devices = await uow.deviceRepository.getDevicesFromOrganization(request.params.organization);
                 return devices;
             } catch(e) {
                 return h.response().code(500);
@@ -33,7 +33,7 @@ const routes = [
 
             try {
                 const kazooService = new KazooService();
-                await kazooService.authenticate();
+                await kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
                 const devices = await kazooService.getDevices(request.params.organization);
                 return devices;
             } catch(e) {
@@ -57,13 +57,8 @@ const routes = [
 
             try {
                 const kazooService = new KazooService();
-                await kazooService.authenticate();
-                const devices = await kazooService.getDevices(request.payload.organization);
-                const device = devices.find((d:any) => d.id === request.payload.id);
-                if(device === undefined) {
-                    logger.error('Device not found.');
-                    return h.response().code(404);
-                }
+                await kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
+                const device = await kazooService.getDevice(request.payload.organization, request.payload.id);
                 await uow.deviceRepository.updateDevice(request.payload.address, {
                     organization: request.payload.organization,
                     name: device.name,
