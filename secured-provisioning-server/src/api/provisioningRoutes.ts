@@ -55,7 +55,7 @@ const routes: any[] = [
                     }
 
                     const kazooService = new KazooService();
-                    kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
+                    await kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
                     template = soundpointIPConverter(config, undefined, undefined, devices.map(async (d:any) => {
                         const kazooDevice = await kazooService.getDevice(d.organization, d.kazoo_id);
                         return {
@@ -107,11 +107,6 @@ const routes: any[] = [
                 if(request.params.address !== device.user) {
                     logger.debug(`Request failed: URL doesn't match username in db.`);
                     return h.response().code(404);
-                }
-
-                if(!request.auth.isAuthenticated || request.auth.credentials.username !== device.user || request.auth.credentials.password !== device.password) {
-                    logger.debug(`Request failed: failed authentication.`);
-                    return h.response().code(401).header('WWW-Authenticate', 'Basic realm="Restricted Content"');
                 }
 
                 const config = await uow.configurationRepository.composeConfig(device.model, device.organization);
