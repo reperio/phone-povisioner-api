@@ -44,6 +44,15 @@ async function startServer() : Promise<void> {
             }
         });
 
+        await server.registerExtension({
+            type: 'onPreAuth',
+            method: async (request: Request, h: any) => {
+                request.server.app.logger.debug(`Pre-auth: ${request.path}`);
+
+                return h.continue;
+            }
+        });
+
         await server.registerAdditionalPlugin(require('hapi-auth-basic'));
         server.strategy('provisioningAuth', 'basic', {validate, unauthorizedAttributes: {realm: 'Restricted'}});
 
