@@ -70,7 +70,7 @@ async function startServer() : Promise<void> {
                     
                     if(!userAgent.macAddress || !userAgent.firmwareVersion || !userAgent.model || !userAgent.type || !userAgent.transportType || !userAgent.applicationTag) {
                         logger.debug('Request failed: invalid user-agent header.');
-                        return h.response().code(404);
+                        return h.response().takeover().code(404);
                     }
 
                     logger.debug(`Getting devices for mac address ${userAgent.macAddress}`);
@@ -83,14 +83,14 @@ async function startServer() : Promise<void> {
                             userAgent.model, userAgent.macAddress, userAgent.firmwareVersion
                         );
                         logger.debug(`Added device: ${userAgent.macAddress}`);
-                        return h.response().code(404);
+                        return h.response().takeover().code(404);
                     }
 
                     const device = devices[0];
 
                     if(device.status === 'initial') {
                         logger.debug(`Request failed: device is not adopted.`);
-                        return h.response().code(404);
+                        return h.response().takeover().code(404);
                     }
 
                     if (device.status === 'adopted' || device.status === 'initial_credentials') {
@@ -112,14 +112,15 @@ async function startServer() : Promise<void> {
         
                         const xml = builder.create(builderObj,{version: '1.0', standalone: true});
         
-                        return h.response(xml.end()).header('Content-Type', 'text/xml');
+                        return h.response(xml.end()).takeover().header('Content-Type', 'text/xml');
                     }
 
+                    logger.debug('Pre-auth finished, continuing');
                     return h.continue;
                 } catch(err) {
                     logger.error('Pre-auth failed.');
                     logger.error(err);
-                    return h.response().code(500);
+                    return h.response().takeover().code(500);
                 }
             }
         });
