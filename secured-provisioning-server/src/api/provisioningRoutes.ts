@@ -124,7 +124,7 @@ const routes: any[] = [
             }
         },
         config: {
-            auth: 'provisioningAuth'
+            auth: false
         }
     },
     {
