@@ -2,6 +2,7 @@ import {Request} from "hapi";
 import {soundpointIPConverter, getModelIDFromPath, firmwareVersion, RegistrationInfo} from "../../../config-conversion";
 import * as builder from 'xmlbuilder';
 import KazooService from '../../../kazoo';
+import {parseUserAgentHeader} from "../utils/parseUserAgentHeader";
 
 const routes: any[] = [
     {
@@ -86,10 +87,12 @@ const routes: any[] = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
+            const userAgent = parseUserAgentHeader(request.headers['user-agent']);
+
             logger.debug(`Fetching temp config. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
-                const devices = await uow.deviceRepository.getDevicesFromPhone(request.auth.credentials.userAgent.macAddress);
+                const devices = await uow.deviceRepository.getDevicesFromPhone(userAgent.macAddress);
 
                 if(devices.length === 0) {
                     return h.response().code(404);
@@ -113,13 +116,14 @@ const routes: any[] = [
 
                 const template = soundpointIPConverter(config, device.user, device.password);
                 const status = device.status === 'adopted' ? 'initial_credentials' : 'given_credentials';
-                await uow.deviceRepository.updateDevice(request.auth.credentials.userAgent.macAddress, {status});
+                await uow.deviceRepository.updateDevice(userAgent.macAddress, {status});
 
                 logger.debug('Sent config');
                 logger.debug(template);
 
                 return h.response(template).header('Content-Type', 'text/xml');
             } catch(e) {
+                logger.error(e);
                 return h.response().code(500);
             }
         },
