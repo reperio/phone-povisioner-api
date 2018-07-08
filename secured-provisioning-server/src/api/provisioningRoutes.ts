@@ -182,9 +182,7 @@ const routes: any[] = [
                 builderObj[`APPLICATION_${request.auth.credentials.userAgent.applicationTag}`][`@APP_FILE_PATH_${request.auth.credentials.userAgent.applicationTag}`] = firmwareVersion(
                     await uow.configurationRepository.composeBaseConfig(request.auth.credentials.userAgent.model, '1')
                 );
-                builderObj[`APPLICATION_${request.auth.credentials.userAgent.applicationTag}`][`@CONFIG_FILES_${request.auth.credentials.userAgent.applicationTag}`]
-                    = device.status === 'adopted' || device.status === 'initial_credentials'
-                    ? `/temp/${device.user}.cfg` : `/${request.auth.credentials.userAgent.rawMacAddress}-provisioned.cfg`;
+                builderObj[`APPLICATION_${request.auth.credentials.userAgent.applicationTag}`][`@CONFIG_FILES_${request.auth.credentials.userAgent.applicationTag}`] = `/${request.auth.credentials.userAgent.rawMacAddress}-provisioned.cfg`;
 
                 const xml = builder.create(builderObj,{version: '1.0', standalone: true});
 
