@@ -45,7 +45,7 @@ async function startServer() : Promise<void> {
         });
 
         await server.registerAdditionalPlugin(require('hapi-auth-basic'));
-        server.strategy('provisioningAuth', 'basic', {validate});
+        server.strategy('provisioningAuth', 'basic', {validate, unauthorizedAttributes: {realm: 'Restricted'}});
 
         await server.startServer();
         await server.registerRoutesFromDirectory(path.resolve(__dirname, './api'));
