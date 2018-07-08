@@ -1,0 +1,21 @@
+language: node_js
+node_js:
+  - 9
+  - 8
+env:
+  - TEST_DIR=server
+  - TEST_DIR=provisioning-server
+  - TEST_DIR=secured-provisioning-server
+script: cd $TEST_DIR && npm install && npm build && npm test
+
+
+
+language: node_js
+node_js:
+  - 9
+  - 8
+cache:
+  directories:
+    - node_modules
+after_success:
+    - './node_modules/.bin/jest && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls'
