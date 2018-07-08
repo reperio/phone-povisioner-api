@@ -37,7 +37,7 @@ export class DeviceRepository {
                 .query(this.uow.transaction)
                 .select('devices.*', 'organizations.realm as realm')
                 .where('mac_address', mac_address)
-                .join('organizations', function() {
+                .leftJoin('organizations', function() {
                     this.on('devices.organization', 'organizations.id')
                 });
 
