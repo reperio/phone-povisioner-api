@@ -52,64 +52,75 @@ async function startServer() : Promise<void> {
                 const logger = request.server.app.logger;
 
                 logger.debug(`Pre-auth: ${request.path}`);
+                try {
+                    logger.debug(`Checking if path: ${request.path} matches phone configuration pattern`);
 
-                //check if this request matches the pattern for phones asking for their config
-                const match = request.path.match(/\/([0-9A-Fa-f]){12}.cfg+/g);
+                    //check if this request matches the pattern for phones asking for their config
+                    const match = request.path.match(/\/([0-9A-Fa-f]){12}.cfg+/g);
+                    
+                    if (!match) { //if it's not a match, just continue the pipeline
+                        logger.debug('Route does not match phone configuration pattern, continuing.');
+                        return h.continue;
+                    }
 
-                if (!match) { //if it's not a match, just continue the pipeline
+                    logger.debug('Route matches phone configuration pattern.');
+
+                    const userAgent = parseUserAgentHeader(request.headers['user-agent']);
+                    logger.debug(`User-Agent: ${JSON.stringify(userAgent)}`);
+                    
+                    if(!userAgent.macAddress || !userAgent.firmwareVersion || !userAgent.model || !userAgent.type || !userAgent.transportType || !userAgent.applicationTag) {
+                        logger.debug('Request failed: invalid user-agent header.');
+                        return h.response().code(404);
+                    }
+
+                    logger.debug(`Getting devices for mac address ${userAgent.macAddress}`);
+                    const uow = await request.app.getNewUoW();
+                    const devices = await uow.deviceRepository.getDevicesFromPhone(userAgent.macAddress);
+
+                    if(devices.length === 0) {
+                        logger.debug('No device found, adding device');
+                        await uow.deviceRepository.addDevice(
+                            userAgent.model, userAgent.macAddress, userAgent.firmwareVersion
+                        );
+                        logger.debug(`Added device: ${userAgent.macAddress}`);
+                        return h.response().code(404);
+                    }
+
+                    const device = devices[0];
+
+                    if(device.status === 'initial') {
+                        logger.debug(`Request failed: device is not adopted.`);
+                        return h.response().code(404);
+                    }
+
+                    if (device.status === 'adopted' || device.status === 'initial_credentials') {
+                        let builderObj : any = {
+                            APPLICATION: {
+                                '@APP_FILE_PATH': 'sip.ld',
+                                '@CONFIG_FILES': '',
+                                '@MISC_FILES': '',
+                                '@LOG_FILE_DIRECTORY': '',
+                                '@OVERRIDES_DIRECTORY': '',
+                                '@LICENSE_DIRECTORY': ''
+                            }
+                        };
+                        builderObj[`APPLICATION_${userAgent.applicationTag}`] = {};
+                        builderObj[`APPLICATION_${userAgent.applicationTag}`][`@APP_FILE_PATH_${userAgent.applicationTag}`] = firmwareVersion(
+                            await uow.configurationRepository.composeBaseConfig(userAgent.model, '1')
+                        );
+                        builderObj[`APPLICATION_${userAgent.applicationTag}`][`@CONFIG_FILES_${userAgent.applicationTag}`] = `/temp/${device.user}.cfg`;
+        
+                        const xml = builder.create(builderObj,{version: '1.0', standalone: true});
+        
+                        return h.response(xml.end()).header('Content-Type', 'text/xml');
+                    }
+
                     return h.continue;
+                } catch(err) {
+                    logger.error('Pre-auth failed.');
+                    logger.error(err);
+                    return h.response().code(500);
                 }
-
-                const userAgent = parseUserAgentHeader(request.headers['user-agent']);
-                logger.debug(`User-Agent: ${JSON.stringify(userAgent)}`);
-                
-                if(!userAgent.macAddress || !userAgent.firmwareVersion || !userAgent.model || !userAgent.type || !userAgent.transportType || !userAgent.applicationTag) {
-                    logger.debug('Request failed: invalid user-agent header.');
-                    return h.response().code(404);
-                }
-
-                const uow = await request.app.getNewUoW();
-                const devices = await uow.deviceRepository.getDevicesFromPhone(request.auth.credentials.userAgent.macAddress);
-
-                //Concurrency issues with the other route?
-                if(devices.length === 0) {
-                    await uow.deviceRepository.addDevice(
-                        request.auth.credentials.userAgent.model, request.auth.credentials.userAgent.macAddress, request.auth.credentials.userAgent.firmwareVersion
-                    );
-                    logger.debug(`Added device: ${request.auth.credentials.userAgent.macAddress}`);
-                    return h.response().code(404);
-                }
-
-                const device = devices[0];
-
-                if(device.status === 'initial') {
-                    logger.debug(`Request failed: device is not adopted.`);
-                    return h.response().code(404);
-                }
-
-                if (device.status === 'adopted' || device.status === 'initial_credentials') {
-                    let builderObj : any = {
-                        APPLICATION: {
-                            '@APP_FILE_PATH': 'sip.ld',
-                            '@CONFIG_FILES': '',
-                            '@MISC_FILES': '',
-                            '@LOG_FILE_DIRECTORY': '',
-                            '@OVERRIDES_DIRECTORY': '',
-                            '@LICENSE_DIRECTORY': ''
-                        }
-                    };
-                    builderObj[`APPLICATION_${request.auth.credentials.userAgent.applicationTag}`] = {};
-                    builderObj[`APPLICATION_${request.auth.credentials.userAgent.applicationTag}`][`@APP_FILE_PATH_${request.auth.credentials.userAgent.applicationTag}`] = firmwareVersion(
-                        await uow.configurationRepository.composeBaseConfig(request.auth.credentials.userAgent.model, '1')
-                    );
-                    builderObj[`APPLICATION_${request.auth.credentials.userAgent.applicationTag}`][`@CONFIG_FILES_${request.auth.credentials.userAgent.applicationTag}`] = `/temp/${device.user}.cfg`;
-    
-                    const xml = builder.create(builderObj,{version: '1.0', standalone: true});
-    
-                    return h.response(xml.end()).header('Content-Type', 'text/xml');
-                }
-
-                return h.continue;
             }
         });
 
