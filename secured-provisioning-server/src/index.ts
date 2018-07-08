@@ -5,7 +5,7 @@ import * as builder from 'xmlbuilder';
 import {Request} from 'hapi';
 import {Config} from './config';
 import {parseUserAgentHeader} from "./utils/parseUserAgentHeader";
-import {firmwareVersion} from "../../../config-conversion";
+import {firmwareVersion} from "../../config-conversion";
 
 async function validate(request: Request, username: string, password: string, h: any) {
     const uow = await request.app.getNewUoW();
