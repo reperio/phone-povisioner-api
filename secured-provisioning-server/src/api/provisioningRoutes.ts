@@ -75,7 +75,7 @@ const routes: any[] = [
                             realm: d.realm
                         };
                     });
-                    template = soundpointIPConverter(config, undefined, undefined, await Promise.all(promises));
+                    template = soundpointIPConverter(config, device.user, device.password, await Promise.all(promises));
                 } else {
                     template = soundpointIPConverter(config);
                 }
