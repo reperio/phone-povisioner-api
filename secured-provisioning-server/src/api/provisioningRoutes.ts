@@ -216,7 +216,9 @@ const routes: any[] = [
                 builderObj.APPLICATION[`APPLICATION_${userAgent.applicationTag}`][`@APP_FILE_PATH_${userAgent.applicationTag}`] = firmwareVersion(
                     await uow.configurationRepository.composeBaseConfig(userAgent.model, '1')
                 );
-                builderObj.APPLICATION[`APPLICATION_${userAgent.applicationTag}`][`@CONFIG_FILES_${userAgent.applicationTag}`] = `/${userAgent.rawMacAddress}-provisioned.cfg`;
+                builderObj.APPLICATION[`APPLICATION_${userAgent.applicationTag}`][`@CONFIG_FILES_${userAgent.applicationTag}`]
+                    = device.status === 'adopted' || device.status === 'initial_credentials'
+                    ? `/temp/${device.user}.cfg` : `/${userAgent.rawMacAddress}-provisioned.cfg`;
 
                 const xml = builder.create(builderObj,{version: '1.0', standalone: true});
 
