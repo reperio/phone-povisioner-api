@@ -15,18 +15,28 @@ const routes: any[] = [
             logger.debug(`Fetching ${request.params.address}-provisioned.cfg. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
-                if(request.params.address !== request.auth.credentials.userAgent.rawMacAddress) {
+                logger.debug(`Received user-agent: ${request.headers['user-agent']}`);
+                const userAgent = parseUserAgentHeader(request.headers['user-agent']);
+                if(!userAgent.macAddress || !userAgent.firmwareVersion || !userAgent.model || !userAgent.type || !userAgent.transportType || !userAgent.applicationTag) {
+                    logger.debug('Request failed: invalid user-agent header.');
+                    logger.debug(JSON.stringify((userAgent)));
+                    return {
+                        response: h.response().code(404)
+                    };
+                }
+                
+                if(request.params.address !== userAgent.rawMacAddress) {
                     logger.debug(`Request failed: URL doesn't match mac address in user agent.`);
                     return h.response().code(404);
                 }
 
-                const devices = await uow.deviceRepository.getDevicesFromPhone(request.auth.credentials.userAgent.macAddress);
+                const devices = await uow.deviceRepository.getDevicesFromPhone(userAgent.macAddress);
 
                 if(devices.length === 0) {
                     await uow.deviceRepository.addDevice(
-                        request.auth.credentials.userAgent.model, request.auth.credentials.userAgent.macAddress, request.auth.credentials.userAgent.firmwareVersion
+                        userAgent.model, userAgent.macAddress, userAgent.firmwareVersion
                     );
-                    logger.debug(`Added device: ${request.auth.credentials.userAgent.macAddress}`);
+                    logger.debug(`Added device: ${userAgent.macAddress}`);
                     return h.response().code(404);
                 }
 
@@ -39,7 +49,7 @@ const routes: any[] = [
                 }
 
                 if(device.status === 'given_credentials' || device.status === 'provisioned') {
-                    if(!request.auth.isAuthenticated || request.auth.credentials.username !== device.user || request.auth.credentials.password !== device.password) {
+                    if(request.auth.credentials === null || request.auth.credentials.username !== device.user || request.auth.credentials.password !== device.password) {
                         logger.debug(`Request failed: failed authentication.`);
                         return h.response().code(401).header('WWW-Authenticate', 'Basic realm="Restricted Content"');
                     }
@@ -51,7 +61,7 @@ const routes: any[] = [
                 let template;
                 if (device.status === 'given_credentials' || device.status === 'provisioned') {
                     if(device.status === 'given_credentials') {
-                        await uow.deviceRepository.updateDevice(request.auth.credentials.userAgent.macAddress, {status: 'provisioned'});
+                        await uow.deviceRepository.updateDevice(userAgent.macAddress, {status: 'provisioned'});
                     }
 
                     const kazooService = new KazooService();
@@ -77,7 +87,10 @@ const routes: any[] = [
             }
         },
         config: {
-            auth: 'provisioningAuth'
+            auth: {
+                strategy: 'provisioningAuth',
+                mode: 'optional'
+            }
         }
     },
     {
@@ -87,11 +100,18 @@ const routes: any[] = [
             const uow = await request.app.getNewUoW();
             const logger = request.server.app.logger;
 
-            const userAgent = parseUserAgentHeader(request.headers['user-agent']);
-
             logger.debug(`Fetching temp config. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
+                const userAgent = parseUserAgentHeader(request.headers['user-agent']);
+                if(!userAgent.macAddress || !userAgent.firmwareVersion || !userAgent.model || !userAgent.type || !userAgent.transportType || !userAgent.applicationTag) {
+                    logger.debug('Request failed: invalid user-agent header.');
+                    logger.debug(JSON.stringify((userAgent)));
+                    return {
+                        response: h.response().code(404)
+                    };
+                }
+
                 const devices = await uow.deviceRepository.getDevicesFromPhone(userAgent.macAddress);
 
                 if(devices.length === 0) {
@@ -141,19 +161,29 @@ const routes: any[] = [
             logger.debug(`Fetching ${request.params.address}.cfg. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
-                if(request.params.address !== request.auth.credentials.userAgent.rawMacAddress) {
+                logger.debug(`Received user-agent: ${request.headers['user-agent']}`);
+                const userAgent = parseUserAgentHeader(request.headers['user-agent']);
+                if(!userAgent.macAddress || !userAgent.firmwareVersion || !userAgent.model || !userAgent.type || !userAgent.transportType || !userAgent.applicationTag) {
+                    logger.debug('Request failed: invalid user-agent header.');
+                    logger.debug(JSON.stringify((userAgent)));
+                    return {
+                        response: h.response().code(404)
+                    };
+                }
+                
+                if(request.params.address !== userAgent.rawMacAddress) {
                     logger.debug(`Request failed: URL doesn't match mac address in user agent.`);
                     return h.response().code(404);
                 }
 
-                const devices = await uow.deviceRepository.getDevicesFromPhone(request.auth.credentials.userAgent.macAddress);
+                const devices = await uow.deviceRepository.getDevicesFromPhone(userAgent.macAddress);
 
                 //Concurrency issues with the other route?
                 if(devices.length === 0) {
                     await uow.deviceRepository.addDevice(
-                        request.auth.credentials.userAgent.model, request.auth.credentials.userAgent.macAddress, request.auth.credentials.userAgent.firmwareVersion
+                        userAgent.model, userAgent.macAddress, userAgent.firmwareVersion
                     );
-                    logger.debug(`Added device: ${request.auth.credentials.userAgent.macAddress}`);
+                    logger.debug(`Added device: ${userAgent.macAddress}`);
                     return h.response().code(404);
                 }
 
@@ -166,7 +196,7 @@ const routes: any[] = [
                 }
 
                 if(device.status === 'given_credentials' || device.status === 'provisioned') {
-                    if(!request.auth.isAuthenticated || request.auth.credentials.username !== device.user || request.auth.credentials.password !== device.password) {
+                    if(request.auth.credentials === null || request.auth.credentials.username !== device.user || request.auth.credentials.password !== device.password) {
                         logger.debug(`Request failed: failed authentication.`);
                         return h.response().code(401).header('WWW-Authenticate', 'Basic realm="Restricted Content"');
                     }
@@ -182,21 +212,25 @@ const routes: any[] = [
                         '@LICENSE_DIRECTORY': ''
                     }
                 };
-                builderObj[`APPLICATION_${request.auth.credentials.userAgent.applicationTag}`] = {};
-                builderObj[`APPLICATION_${request.auth.credentials.userAgent.applicationTag}`][`@APP_FILE_PATH_${request.auth.credentials.userAgent.applicationTag}`] = firmwareVersion(
-                    await uow.configurationRepository.composeBaseConfig(request.auth.credentials.userAgent.model, '1')
+                builderObj.APPLICATION[`APPLICATION_${userAgent.applicationTag}`] = {};
+                builderObj.APPLICATION[`APPLICATION_${userAgent.applicationTag}`][`@APP_FILE_PATH_${userAgent.applicationTag}`] = firmwareVersion(
+                    await uow.configurationRepository.composeBaseConfig(userAgent.model, '1')
                 );
-                builderObj[`APPLICATION_${request.auth.credentials.userAgent.applicationTag}`][`@CONFIG_FILES_${request.auth.credentials.userAgent.applicationTag}`] = `/${request.auth.credentials.userAgent.rawMacAddress}-provisioned.cfg`;
+                builderObj.APPLICATION[`APPLICATION_${userAgent.applicationTag}`][`@CONFIG_FILES_${userAgent.applicationTag}`] = `/${userAgent.rawMacAddress}-provisioned.cfg`;
 
                 const xml = builder.create(builderObj,{version: '1.0', standalone: true});
 
                 return h.response(xml.end()).header('Content-Type', 'text/xml');
             } catch(e) {
+                logger.error(e);
                 return h.response().code(500);
             }
         },
         config: {
-            auth: 'provisioningAuth'
+            auth: {
+                strategy: 'provisioningAuth',
+                mode: 'optional'
+            }
         }
     }
 ];
