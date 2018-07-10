@@ -33,6 +33,13 @@ export class XMLPropertyBuilder {
         return this;
     }
 
+    tryAddPropertyFlatTree(name: string, value: any) : XMLPropertyBuilder {
+        if(value !== undefined) {
+            this.obj[name] = value;
+        }
+        return this;
+    }
+
     tryAddBoolean(name: string, value: boolean) : XMLPropertyBuilder {
         if(value !== undefined) {
             this.addProperty(name, value ? '1' : '0');

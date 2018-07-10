@@ -66,14 +66,16 @@ const routes: any[] = [
 
                     const kazooService = new KazooService(logger);
                     await kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
-                    template = soundpointIPConverter(config, undefined, undefined, devices.map(async (d:any) => {
+                    const promises : Promise<RegistrationInfo>[] = devices.map(async (d:any) => {
                         const kazooDevice = await kazooService.getDevice(d.organization, d.kazoo_id);
+                        logger.debug(`Received Kazoo device for ${d.mac_address}:\n${JSON.stringify(kazooDevice)}`);
                         return {
                             username: kazooDevice.sip.username,
                             password: kazooDevice.sip.password,
                             realm: d.realm
                         };
-                    }));
+                    });
+                    template = soundpointIPConverter(config, undefined, undefined, await Promise.all(promises));
                 } else {
                     template = soundpointIPConverter(config);
                 }
