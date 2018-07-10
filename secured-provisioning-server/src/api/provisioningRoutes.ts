@@ -83,6 +83,8 @@ const routes: any[] = [
 
                 return h.response(template).header('Content-Type', 'text/xml');
             } catch(e) {
+                logger.error(`Failed to fetch ${request.params.address}-provisioned.cfg.`);
+                logger.error(e);
                 return h.response().code(500);
             }
         },
@@ -143,6 +145,7 @@ const routes: any[] = [
 
                 return h.response(template).header('Content-Type', 'text/xml');
             } catch(e) {
+                logger.error(`Failed to fetch temp config.`);
                 logger.error(e);
                 return h.response().code(500);
             }
@@ -224,6 +227,7 @@ const routes: any[] = [
 
                 return h.response(xml.end()).header('Content-Type', 'text/xml');
             } catch(e) {
+                logger.error(`Failed to fetch ${request.params.address}.cfg.`);
                 logger.error(e);
                 return h.response().code(500);
             }
