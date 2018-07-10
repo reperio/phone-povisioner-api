@@ -32,7 +32,7 @@ const routes = [
             logger.debug(`Running /devices/kazoo-devices. Raw params:\n${JSON.stringify(request.params)}`);
 
             try {
-                const kazooService = new KazooService();
+                const kazooService = new KazooService(logger);
                 await kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
                 const devices = await kazooService.getDevices(request.params.organization);
                 return devices;
@@ -56,7 +56,7 @@ const routes = [
             logger.debug(`Running /devices/adopt. Raw payload:\n${JSON.stringify(request.payload)}`);
 
             try {
-                const kazooService = new KazooService();
+                const kazooService = new KazooService(logger);
                 await kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
                 const device = await kazooService.getDevice(request.payload.organization, request.payload.id);
                 await uow.deviceRepository.updateDevice(request.payload.address, {

@@ -30,7 +30,7 @@ async function syncOrganizations() : Promise<void> {
 
     try {
         const cachedOrganizations = await uow.organizationRepository.getOrganizations();
-        const kazooService = new KazooService();
+        const kazooService = new KazooService(logger);
         logger.info('Renewing API auth');
         await kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
         logger.info('Fetching new organizations');

@@ -64,7 +64,7 @@ const routes: any[] = [
                         await uow.deviceRepository.updateDevice(userAgent.macAddress, {status: 'provisioned'});
                     }
 
-                    const kazooService = new KazooService();
+                    const kazooService = new KazooService(logger);
                     await kazooService.authenticate(process.env.CREDENTIALS, process.env.ACCOUNT_NAME);
                     template = soundpointIPConverter(config, undefined, undefined, devices.map(async (d:any) => {
                         const kazooDevice = await kazooService.getDevice(d.organization, d.kazoo_id);
