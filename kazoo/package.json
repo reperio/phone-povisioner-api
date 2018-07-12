@@ -11,9 +11,11 @@
   "author": "Seven Hills Technology",
   "license": "ISC",
   "devDependencies": {
+    "@types/winston": "^2.3.9",
     "typescript": "^2.9.2"
   },
   "dependencies": {
-    "axios": "^0.18.0"
+    "axios": "^0.18.0",
+    "winston": "^2.4.0"
   }
 }
